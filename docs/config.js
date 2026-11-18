@@ -9,4 +9,4 @@
  * Este endereço não é segredo (qualquer visitante do site consegue vê-lo).
  * A senha da secretaria fica só na planilha; nunca coloque senhas aqui.
  */
-window.CALENDARIO_API = 'COLE_AQUI_O_ENDERECO_QUE_TERMINA_EM_/exec';
+window.CALENDARIO_API = 'https://script.google.com/macros/s/AKfycbzvF8WmiS89Vy-_SOGxpnCiKK5X4lAES2Z-Pkc936_FVJH42D_qnI8jt3r-OSekgduquQ/exec';
