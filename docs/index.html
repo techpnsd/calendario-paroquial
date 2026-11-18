@@ -349,6 +349,19 @@ dialog::backdrop { background: rgba(10, 16, 30, .55); }
 .opcao:has(input:checked) { border-color: var(--primary); background: var(--primary-soft); }
 .opcao small { display: block; color: var(--ink-3); font-size: 14px; }
 
+/* "aguarde": bloqueia a página enquanto uma ação está em andamento */
+dialog.espera { width: fit-content; min-width: 250px; max-width: calc(100vw - 32px); border-radius: 14px; opacity: 0; animation: aparecer .18s ease .12s forwards; }
+dialog.espera::backdrop { background: rgba(10, 16, 30, .4); opacity: 0; animation: aparecer .18s ease .12s forwards; }
+.espera-in { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 24px 28px 20px; text-align: center; }
+#esperaMsg { margin: 4px 0 0; font-weight: 700; font-size: 18px; }
+.spinner { width: 40px; height: 40px; border-radius: 50%; border: 4px solid var(--primary-soft); border-top-color: var(--primary); animation: girar .8s linear infinite; }
+@keyframes girar { to { transform: rotate(360deg); } }
+@keyframes aparecer { to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation-duration: 2.4s; }
+  dialog.espera, dialog.espera::backdrop { animation: none; opacity: 1; }
+}
+
 .toast {
   position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%) translateY(20px); opacity: 0; pointer-events: none;
   background: var(--ink); color: var(--bg); padding: 12px 18px; border-radius: 10px; font-weight: 600; box-shadow: var(--shadow); transition: .2s; z-index: 50; max-width: calc(100vw - 32px);
@@ -715,6 +728,9 @@ footer.rodape .links { display: flex; flex-wrap: wrap; gap: 6px 18px; }
     <div class="dlg-rodape" id="dlgRodape"></div>
   </div>
 </dialog>
+<dialog id="espera" class="espera" aria-labelledby="esperaMsg">
+  <div class="espera-in"><span class="spinner" aria-hidden="true"></span><p id="esperaMsg">Aguarde…</p><p class="dica">Só um instante, não feche a página.</p></div>
+</dialog>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -1011,6 +1027,32 @@ footer.rodape .links { display: flex; flex-wrap: wrap; gap: 6px 18px; }
     if (f) f();
   });
   $('#dlg').addEventListener('click', function (ev) { if (ev.target === this) fecharJanela(); });
+
+  // "aguarde": janela que cobre a página (inclusive outras janelas) até a ação terminar.
+  // Evita clique duplo e mostra que algo está acontecendo.
+  var esperaN = 0;
+  function mostrarEspera(msg) {
+    esperaN++;
+    $('#esperaMsg').textContent = msg || 'Aguarde…';
+    var d = $('#espera');
+    if (!d.open) { if (d.showModal) d.showModal(); else d.setAttribute('open', ''); }
+    document.body.setAttribute('aria-busy', 'true');
+  }
+  function esconderEspera() {
+    esperaN = Math.max(0, esperaN - 1);
+    if (esperaN) return;
+    var d = $('#espera');
+    if (d.open) { if (d.close) d.close(); else d.removeAttribute('open'); }
+    document.body.removeAttribute('aria-busy');
+  }
+  function mensagemEspera(msg) { $('#esperaMsg').textContent = msg; }
+  function emAndamento(msg, fn) {
+    mostrarEspera(msg);
+    var p;
+    try { p = Promise.resolve(fn()); } catch (e) { p = Promise.reject(e); }
+    return p.then(function (r) { esconderEspera(); return r; }, function (e) { esconderEspera(); throw e; });
+  }
+  $('#espera').addEventListener('cancel', function (ev) { ev.preventDefault(); }); // Esc não fecha
 
   function confirmar(titulo, msgHtml, textoOk, classe) {
     return new Promise(function (ok) {
@@ -1591,7 +1633,9 @@ footer.rodape .links { display: flex; flex-wrap: wrap; gap: 6px 18px; }
     var btn = $('#btnEnviar');
     F.enviando = true;
     ocupado(btn, true, 'Enviando…');
-    api('enviarPedido', dados, S.modoSec ? S.admin.senha : null).then(function (r) {
+    emAndamento(S.modoSec ? 'Lançando a reserva…' : 'Enviando o pedido…', function () {
+      return api('enviarPedido', dados, S.modoSec ? S.admin.senha : null);
+    }).then(function (r) {
       F.enviando = false;
       ocupado(btn, false);
       guardar('ultimoTel', dados.telefone);
@@ -1668,7 +1712,7 @@ footer.rodape .links { display: flex; flex-wrap: wrap; gap: 6px 18px; }
     }
     var btn = $('#btnConsultar');
     ocupado(btn, true, 'Consultando…');
-    api('consultarPedido', num, tel).then(function (r) {
+    emAndamento('Consultando o pedido…', function () { return api('consultarPedido', num, tel); }).then(function (r) {
       ocupado(btn, false);
       consultaAtual = { num: num, tel: tel };
       renderConsulta(r);
@@ -1706,7 +1750,9 @@ footer.rodape .links { display: flex; flex-wrap: wrap; gap: 6px 18px; }
       '<p style="margin:0">As datas marcadas serão liberadas no calendário para outras pastorais. Não dá para desfazer pelo site.</p>', 'Sim, cancelar', 'perigo')
       .then(function (sim) {
         if (!sim) return;
-        api('cancelarPedido', consultaAtual.num, consultaAtual.tel, ids).then(function (r) {
+        emAndamento(ids.length === 1 ? 'Cancelando a data…' : 'Cancelando as datas…', function () {
+          return api('cancelarPedido', consultaAtual.num, consultaAtual.tel, ids);
+        }).then(function (r) {
           toast('Cancelamento registrado.');
           renderConsulta(r);
           atualizarAnos();
@@ -1733,7 +1779,7 @@ footer.rodape .links { display: flex; flex-wrap: wrap; gap: 6px 18px; }
     if (!senha) return;
     var btn = $('#btnEntrar');
     ocupado(btn, true, 'Entrando…');
-    api('entrarSecretaria', senha).then(function () {
+    emAndamento('Entrando…', function () { return api('entrarSecretaria', senha); }).then(function () {
       ocupado(btn, false);
       S.admin.senha = senha;
       guardarSessao('calparoquial.sec', senha);
@@ -1757,7 +1803,8 @@ footer.rodape .links { display: flex; flex-wrap: wrap; gap: 6px 18px; }
 
   function carregarSecretaria() {
     if (!S.admin.ano) S.admin.ano = +S.hoje.slice(0, 4);
-    $('#secPendentes').innerHTML = '<div class="carregando">Carregando pedidos…</div>';
+    // na primeira vez mostra "Carregando"; ao atualizar, mantém a lista na tela até chegar a nova
+    if (!S.admin.linhas) $('#secPendentes').innerHTML = '<div class="carregando">Carregando pedidos…</div>';
     return api('listarSecretaria', S.admin.senha, S.admin.ano).then(function (r) {
       S.admin.linhas = r.linhas;
       renderSecretaria();
@@ -1821,12 +1868,17 @@ footer.rodape .links { display: flex; flex-wrap: wrap; gap: 6px 18px; }
   function idsMarcados(card) { return $$('.pSel:checked', card).map(function (i) { return i.value; }); }
 
   function mudarStatus(ids, status, motivo, btn) {
+    var msg = { Confirmado: 'Aprovando…', Recusado: 'Recusando…', Cancelado: 'Cancelando…' }[status] || 'Salvando…';
     ocupado(btn, true, 'Salvando…');
-    return api('alterarStatus', S.admin.senha, ids, status, motivo || '').then(function (r) {
+    return emAndamento(msg, function () {
+      return api('alterarStatus', S.admin.senha, ids, status, motivo || '').then(function (r) {
+        mensagemEspera('Atualizando a lista…');
+        atualizarAnos();
+        return carregarSecretaria().then(function () { return r; });
+      });
+    }).then(function (r) {
       ocupado(btn, false);
       toast(r.alteradas + (r.alteradas === 1 ? ' data atualizada.' : ' datas atualizadas.'));
-      atualizarAnos();
-      return carregarSecretaria();
     }, function (e) { ocupado(btn, false); toast(e.message, true); });
   }
 
@@ -1914,11 +1966,15 @@ footer.rodape .links { display: flex; flex-wrap: wrap; gap: 6px 18px; }
             obsSecretaria: $('#eObsSec').value
           };
           ocupado(btn, true, 'Salvando…');
-          api('editarReserva', S.admin.senha, l.id, mud).then(function (r) {
+          emAndamento('Salvando as alterações…', function () {
+            return api('editarReserva', S.admin.senha, l.id, mud).then(function (r) {
+              mensagemEspera('Atualizando a lista…');
+              atualizarAnos();
+              return carregarSecretaria().then(function () { return r; });
+            });
+          }).then(function (r) {
             ocupado(btn, false);
             fecharJanela();
-            atualizarAnos();
-            carregarSecretaria();
             if (S.pagina === 'calendario') renderCalendario();
             if (r.conflitos && r.conflitos.length) {
               abrirJanela('Salvo, mas há conflito', '<p style="margin:0">Já existe outra reserva no mesmo local e horário:</p><ul>' + r.conflitos.map(function (x) {
@@ -1987,7 +2043,7 @@ footer.rodape .links { display: flex; flex-wrap: wrap; gap: 6px 18px; }
       formato: $('input[name="xFmt"]:checked').value, pendentes: $('#xPend').checked, especiais: $('#xEsp').checked
     };
     ocupado(btn, true, 'Gerando…');
-    gerarPlanilha(opts).then(function (arq) {
+    emAndamento('Gerando a planilha…', function () { return gerarPlanilha(opts); }).then(function (arq) {
       ocupado(btn, false);
       ultimoArquivo = arq;
       var compartilha = podeCompartilhar(arq);
@@ -2366,7 +2422,7 @@ footer.rodape .links { display: flex; flex-wrap: wrap; gap: 6px 18px; }
       case 'cancelar-marcadas': cancelarMarcadas(); break;
       case 'marcar-todas': $$('.cCanc').forEach(function (i) { i.checked = true; }); break;
       case 'sec-sair': sair(); break;
-      case 'sec-atualizar': carregarSecretaria(); break;
+      case 'sec-atualizar': emAndamento('Atualizando a lista…', carregarSecretaria); break;
       case 'sec-nova': S.modoSec = true; aplicarMinimos(); limparForm(false); irPara('reservar'); break;
       case 'aprovar': {
         var card = t.closest('.pedido-card'), ids = idsMarcados(card);
