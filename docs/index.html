@@ -506,7 +506,7 @@ footer.rodape .links { display: flex; flex-wrap: wrap; gap: 6px 18px; }
       <select id="fPastoral" aria-label="Filtrar por pastoral"><option value="">Todas as pastorais</option></select>
     </div>
     <div class="legenda" id="legenda"></div>
-    <div id="calCorpo"><div class="carregando">Carregando…</div></div>
+    <div id="calCorpo"><div class="carregando">Carregando o calendário…</div></div>
   </section>
 
   <!-- ===================== RESERVAR ===================== -->
@@ -588,8 +588,8 @@ footer.rodape .links { display: flex; flex-wrap: wrap; gap: 6px 18px; }
             </div>
             <p class="contagem" id="contPrincipais"></p>
             <div class="lista-datas" id="listaPrincipais"></div>
-            <div class="campo">
-              <label for="rAvulsa">Tem outra data com o mesmo horário? <span class="opc">(opcional)</span></label>
+            <div class="campo" id="campoAvulsa" hidden>
+              <label for="rAvulsa">Adicionar outra data <span class="opc">(mesmo horário)</span></label>
               <div class="add-linha">
                 <input type="date" id="rAvulsa">
                 <button type="button" class="btn" data-acao="add-avulsa">Adicionar data</button>
@@ -888,10 +888,24 @@ footer.rodape .links { display: flex; flex-wrap: wrap; gap: 6px 18px; }
     }, function (e) { delete S.carregandoAno[a]; throw e; });
     return S.carregandoAno[a];
   }
-  function recarregarAnos() {
+  /** Depois de enviar, cancelar, aprovar ou editar: busca de novo os anos já abertos,
+   *  sem tirar o calendário da tela, e redesenha quando chegar. */
+  var atualizando = null;
+  function atualizarAnos() {
+    if (atualizando) return atualizando;
     var anos = Object.keys(S.anos);
-    S.anos = {};
-    return Promise.all(anos.map(garantirAno));
+    atualizando = Promise.all(anos.map(function (a) {
+      return api('listarEventos', +a).then(function (r) { S.anos[a] = r.eventos; });
+    })).then(function () {
+      atualizando = null;
+      var salvo = window.__semCache ? null : lerJSON('dados');
+      if (salvo && salvo.anos) {
+        anos.forEach(function (a) { if (a in salvo.anos) salvo.anos[a] = S.anos[a]; });
+        guardar('dados', JSON.stringify(salvo));
+      }
+      if (S.pagina === 'calendario') renderCalendario();
+    }, function () { atualizando = null; });
+    return atualizando;
   }
   function passaFiltro(e) {
     if (S.fLocal && (e.locais || []).indexOf(S.fLocal) < 0) return false;
@@ -1063,10 +1077,10 @@ footer.rodape .links { display: flex; flex-wrap: wrap; gap: 6px 18px; }
 
     var per = periodoAtual();
     var corpo = $('#calCorpo');
-    var anos = [+per.ini.slice(0, 4), +per.fim.slice(0, 4)];
-    var faltam = anos.filter(function (a) { return !S.anos[a]; });
+    var a0 = +per.ini.slice(0, 4), a1 = +per.fim.slice(0, 4);
+    var faltam = (a0 === a1 ? [a0] : [a0, a1]).filter(function (a) { return !S.anos[a]; });
     if (faltam.length) {
-      corpo.innerHTML = '<div class="carregando">Carregando ' + faltam.join(' e ') + '…</div>';
+      corpo.innerHTML = '<div class="carregando">Carregando o calendário…</div>';
       var cursorPedido = S.cursor, vistaPedida = S.vista;
       Promise.all(faltam.map(garantirAno)).then(function () {
         if (S.cursor === cursorPedido && S.vista === vistaPedida && S.pagina === 'calendario') renderCalendario();
@@ -1287,6 +1301,7 @@ footer.rodape .links { display: flex; flex-wrap: wrap; gap: 6px 18px; }
     } else {
       ops.push(['semanal', 'Toda semana'], ['quinzenal', 'A cada 15 dias'], ['mensal-n', 'Todo mês (mesmo dia da semana)'], ['mensal-dia', 'Todo mês (mesmo dia do mês)']);
     }
+    ops.push(['personalizado', 'Personalizado (eu escolho as datas)']);
     sel.innerHTML = ops.map(function (o) {
       return '<option value="' + o[0] + '">' + esc(o[1]) + '</option>';
     }).join('');
@@ -1303,7 +1318,7 @@ footer.rodape .links { display: flex; flex-wrap: wrap; gap: 6px 18px; }
   }
   function gerarRecorrencia(base, regra, ate) {
     if (!valido(base)) return [];
-    if (regra === 'nao' || !valido(ate) || ate <= base) return [base];
+    if (regra === 'nao' || regra === 'personalizado' || !valido(ate) || ate <= base) return [base];
     var out = [], MAX = 200, d;
     if (regra === 'semanal' || regra === 'quinzenal') {
       for (d = base; d <= ate && out.length < MAX; d = somaDias(d, regra === 'semanal' ? 7 : 14)) out.push(d);
@@ -1333,10 +1348,11 @@ footer.rodape .links { display: flex; flex-wrap: wrap; gap: 6px 18px; }
   function datasGeradas() {
     return gerarRecorrencia($('#rData').value, $('#rRep').value, $('#rAte').value);
   }
+  function personalizado() { return $('#rRep').value === 'personalizado'; }
   function datasPrincipais() {
     var set = {};
     datasGeradas().forEach(function (d) { if (!F.removidas[d]) set[d] = true; });
-    F.avulsas.forEach(function (d) { set[d] = true; });
+    if (personalizado()) F.avulsas.forEach(function (d) { set[d] = true; });
     return Object.keys(set).sort();
   }
   function todasDatas() {
@@ -1363,13 +1379,15 @@ footer.rodape .links { display: flex; flex-wrap: wrap; gap: 6px 18px; }
   function textoRepeticao() {
     var regra = $('#rRep').value, base = $('#rData').value, ate = $('#rAte').value;
     var t = 'Não se repete';
-    if (regra !== 'nao' && valido(base)) {
+    if (regra === 'personalizado') {
+      var n = datasPrincipais().length;
+      t = 'Personalizado: ' + n + (n === 1 ? ' data escolhida' : ' datas escolhidas');
+    } else if (regra !== 'nao' && valido(base)) {
       var op = $('#rRep').selectedOptions[0];
       t = (op ? op.textContent : regra) + (valido(ate) ? ' até ' + br(ate) : '');
     }
     var rem = Object.keys(F.removidas).filter(function (d) { return datasGeradas().indexOf(d) >= 0; }).length;
     if (rem) t += ' (menos ' + rem + ' data' + (rem > 1 ? 's' : '') + ')';
-    if (F.avulsas.length) t += ' + ' + F.avulsas.length + ' data' + (F.avulsas.length > 1 ? 's' : '') + ' avulsa' + (F.avulsas.length > 1 ? 's' : '');
     if ($('#rVespera').checked) t += ' · com dia anterior para preparação';
     return t;
   }
@@ -1382,7 +1400,9 @@ footer.rodape .links { display: flex; flex-wrap: wrap; gap: 6px 18px; }
 
   function atualizarForm() {
     var base = $('#rData').value;
-    $('#campoAte').hidden = $('#rRep').value === 'nao';
+    var regra = $('#rRep').value;
+    $('#campoAte').hidden = regra === 'nao' || regra === 'personalizado';
+    $('#campoAvulsa').hidden = regra !== 'personalizado';
     if (!$('#campoAte').hidden && !$('#rAte').value && valido(base)) $('#rAte').value = base.slice(0, 4) + '-12-31';
     $('.hs', $('[data-campo="horario"]')).hidden = $('#rDiaInteiro').checked;
     $('#vesperaHorario').hidden = !$('#rVespera').checked;
@@ -1393,13 +1413,17 @@ footer.rodape .links { display: flex; flex-wrap: wrap; gap: 6px 18px; }
     // datas principais (chips)
     var ger = datasGeradas();
     var princ = datasPrincipais();
-    $('#listaPrincipais').innerHTML = princ.length > 1 || F.avulsas.length ? princ.map(function (d) {
+    $('#listaPrincipais').innerHTML = princ.length > 1 || regra === 'personalizado' ? princ.map(function (d) {
       return '<span class="dchip">' + esc(brCurto(d)) + (d.slice(0, 4) !== (base || d).slice(0, 4) ? '/' + d.slice(2, 4) : '') +
         '<button type="button" data-remover="' + d + '" aria-label="Tirar ' + esc(brLongo(d)) + '">' + ICO_X + '</button></span>';
     }).join('') : '';
     var cont = '';
-    if (princ.length > 1) cont = princ.length + ' datas do evento. Toque no × para tirar alguma (ex.: feriado ou dia em que não vai ter).';
-    else if (ger.length && $('#rRep').value !== 'nao') cont = 'Escolha até quando o evento se repete.';
+    if (regra === 'personalizado') {
+      cont = princ.length
+        ? (princ.length === 1 ? '1 data escolhida.' : princ.length + ' datas escolhidas.') + ' Adicione as outras datas abaixo; toque no × para tirar alguma.'
+        : 'Escolha a data do evento acima e adicione as outras datas abaixo.';
+    } else if (princ.length > 1) cont = princ.length + ' datas do evento. Toque no × para tirar alguma (ex.: feriado ou dia em que não vai ter).';
+    else if (ger.length && regra !== 'nao') cont = 'Escolha até quando o evento se repete.';
     $('#contPrincipais').textContent = cont;
     $('#contPrincipais').hidden = !cont;
 
@@ -1523,7 +1547,7 @@ footer.rodape .links { display: flex; flex-wrap: wrap; gap: 6px 18px; }
     if (!$('#rEvento').value.trim()) e('evento', 'Informe o nome do evento.');
     if (!locaisEscolhidos().length) e('locais', 'Marque pelo menos um local.');
     var base = $('#rData').value;
-    if (!valido(base) && !F.avulsas.length) e('data', 'Escolha a data do evento.');
+    if (!valido(base) && !(personalizado() && F.avulsas.length)) e('data', 'Escolha a data do evento.');
     else if (valido(base) && base < S.hoje && !S.modoSec) e('data', 'Essa data já passou.');
     var hp = horarioPrincipal();
     if (!hp.diaInteiro) {
@@ -1572,7 +1596,7 @@ footer.rodape .links { display: flex; flex-wrap: wrap; gap: 6px 18px; }
       ocupado(btn, false);
       guardar('ultimoTel', dados.telefone);
       mostrarSucesso(r, dados);
-      Object.keys(S.anos).forEach(function (a) { delete S.anos[a]; });
+      atualizarAnos();
       if (S.admin.senha) S.admin.linhas = null;
     }, function (e) {
       F.enviando = false;
@@ -1685,7 +1709,7 @@ footer.rodape .links { display: flex; flex-wrap: wrap; gap: 6px 18px; }
         api('cancelarPedido', consultaAtual.num, consultaAtual.tel, ids).then(function (r) {
           toast('Cancelamento registrado.');
           renderConsulta(r);
-          Object.keys(S.anos).forEach(function (a) { delete S.anos[a]; });
+          atualizarAnos();
         }, function (e) { toast(e.message, true); });
       });
   }
@@ -1801,7 +1825,7 @@ footer.rodape .links { display: flex; flex-wrap: wrap; gap: 6px 18px; }
     return api('alterarStatus', S.admin.senha, ids, status, motivo || '').then(function (r) {
       ocupado(btn, false);
       toast(r.alteradas + (r.alteradas === 1 ? ' data atualizada.' : ' datas atualizadas.'));
-      Object.keys(S.anos).forEach(function (a) { delete S.anos[a]; });
+      atualizarAnos();
       return carregarSecretaria();
     }, function (e) { ocupado(btn, false); toast(e.message, true); });
   }
@@ -1893,7 +1917,7 @@ footer.rodape .links { display: flex; flex-wrap: wrap; gap: 6px 18px; }
           api('editarReserva', S.admin.senha, l.id, mud).then(function (r) {
             ocupado(btn, false);
             fecharJanela();
-            Object.keys(S.anos).forEach(function (a) { delete S.anos[a]; });
+            atualizarAnos();
             carregarSecretaria();
             if (S.pagina === 'calendario') renderCalendario();
             if (r.conflitos && r.conflitos.length) {
