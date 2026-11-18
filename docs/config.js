@@ -9,4 +9,4 @@
  * Este endereço não é segredo (qualquer visitante do site consegue vê-lo).
  * A senha da secretaria fica só na planilha; nunca coloque senhas aqui.
  */
-window.CALENDARIO_API = 'https://script.google.com/macros/s/AKfycbzvF8WmiS89Vy-_SOGxpnCiKK5X4lAES2Z-Pkc936_FVJH42D_qnI8jt3r-OSekgduquQ/exec';
+window.CALENDARIO_API = 'https://script.google.com/macros/s/AKfycbzRZg8-V2MDlh_7Fa3jEqjbN0RdCExuzWPjtO36YLb7BWIv2qTyL-R1w2w3uIiuPGMhgg/exec';
