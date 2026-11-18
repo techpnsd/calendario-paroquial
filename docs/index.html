@@ -1,0 +1,2497 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calendário Paroquial · Paróquia Nossa Senhora das Dores</title>
+<meta name="description" content="Calendário e reserva de espaços da Paróquia Nossa Senhora das Dores.">
+<meta name="theme-color" content="#1f3a68">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Calendário">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap">
+<style>
+/* Layout: faixa azul-mariana no topo com o nome da paróquia; abaixo, a "folha" do mês
+   em grade de 7 colunas (dom→sáb) como o calendário de parede; formulário em 2 colunas
+   (campos + resumo fixo) que vira 1 coluna no celular. */
+:root {
+  --bg: #f2f4f8;
+  --surface: #ffffff;
+  --surface-2: #e9edf4;
+  --ink: #1a2335;
+  --ink-2: #4b566b;
+  --ink-3: #6f7a8f;
+  --line: #d3d9e4;
+  --band: #1f3a68;
+  --band-ink: #ffffff;
+  --band-ink-2: #c9d6ee;
+  --primary: #1f3a68;
+  --primary-ink: #ffffff;
+  --primary-soft: #e2e9f5;
+  --link: #24467e;
+  --gold: #99701a;
+  --gold-soft: #f7eed9;
+  --ok: #26704a;
+  --ok-soft: #e0f0e6;
+  --warn: #8a5300;
+  --warn-soft: #fbefd5;
+  --bad: #a1341d;
+  --bad-soft: #f8e2dc;
+  --focus: #3a6fd8;
+  --shadow: 0 1px 2px rgba(18, 30, 58, .06), 0 6px 18px rgba(18, 30, 58, .07);
+  --f-display: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --f-body: "Source Sans 3", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  --r: 10px;
+  --r-sm: 6px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1420; --surface: #151d2c; --surface-2: #1c2638; --ink: #e5e9f1; --ink-2: #aab3c5; --ink-3: #8691a6;
+    --line: #2b374d; --band: #13223f; --band-ink: #f2f5fb; --band-ink-2: #9fb2d6; --primary: #7aa2e6; --primary-ink: #0b1323;
+    --primary-soft: #1d2b46; --link: #9fbdf0; --gold: #d9b45e; --gold-soft: #2e2716; --ok: #6cc595; --ok-soft: #16301f;
+    --warn: #e5b35a; --warn-soft: #33270f; --bad: #ef8a72; --bad-soft: #3a1c15; --focus: #8fb4ff;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 6px 18px rgba(0, 0, 0, .25);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1420; --surface: #151d2c; --surface-2: #1c2638; --ink: #e5e9f1; --ink-2: #aab3c5; --ink-3: #8691a6;
+  --line: #2b374d; --band: #13223f; --band-ink: #f2f5fb; --band-ink-2: #9fb2d6; --primary: #7aa2e6; --primary-ink: #0b1323;
+  --primary-soft: #1d2b46; --link: #9fbdf0; --gold: #d9b45e; --gold-soft: #2e2716; --ok: #6cc595; --ok-soft: #16301f;
+  --warn: #e5b35a; --warn-soft: #33270f; --bad: #ef8a72; --bad-soft: #3a1c15; --focus: #8fb4ff;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 6px 18px rgba(0, 0, 0, .25);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 16px; line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+[hidden] { display: none !important; }
+a { color: var(--link); }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+h1, h2, h3, h4 { text-wrap: balance; margin: 0; line-height: 1.2; }
+.wrap { max-width: 1200px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.num { font-variant-numeric: tabular-nums; }
+
+/* ---------- faixa do topo ---------- */
+.band { background: var(--band); color: var(--band-ink); }
+.band-in { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 14px 24px; padding-block: 22px 0; }
+.brand { display: flex; align-items: center; gap: 14px; min-width: 0; padding-bottom: 14px; }
+.brand-logo { width: 64px; height: 64px; flex: none; border-radius: 50%; background: #fff; box-shadow: 0 0 0 2px rgba(255, 255, 255, .85), 0 3px 10px rgba(0, 0, 0, .28); }
+.brand-eyebrow { margin: 0; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--band-ink-2); font-weight: 600; }
+.brand h1 { font-family: var(--f-display); font-weight: 700; font-size: clamp(26px, 4.2vw, 38px); letter-spacing: .005em; }
+.tabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; max-width: 100%; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  border: 0; background: transparent; color: var(--band-ink-2); padding: 12px 16px 13px; font-weight: 600; font-size: 16px;
+  border-radius: 10px 10px 0 0; cursor: pointer; white-space: nowrap;
+}
+a.tab { text-decoration: none; display: inline-flex; align-items: center; }
+.tab:hover { color: var(--band-ink); background: rgba(255, 255, 255, .08); }
+.tab[aria-current="page"] { background: var(--bg); color: var(--ink); }
+
+.faixa-demo { background: var(--gold-soft); color: var(--ink); border-bottom: 1px solid var(--line); font-size: 14px; }
+.faixa-demo .wrap { padding-block: 8px; }
+
+main { padding-block: 24px 40px; }
+.pg-cab { display: grid; gap: 6px; margin-bottom: 18px; }
+.pg-cab h2 { font-size: 28px; font-weight: 700; }
+.pg-cab p { margin: 0; color: var(--ink-2); max-width: 68ch; }
+.estreito { max-width: 760px; }
+
+/* ---------- botões e campos ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 42px; padding: 8px 16px;
+  border-radius: var(--r-sm); border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  font-weight: 600; cursor: pointer; text-decoration: none; white-space: nowrap;
+}
+.btn:hover { border-color: var(--ink-3); }
+.btn svg { width: 18px; height: 18px; flex: none; }
+.btn.primario { background: var(--primary); color: var(--primary-ink); border-color: var(--primary); }
+.btn.primario:hover { filter: brightness(1.08); }
+.btn.perigo { background: var(--bad); color: #fff; border-color: var(--bad); }
+.btn.ok { background: var(--ok); color: #fff; border-color: var(--ok); }
+.btn.ghost { background: transparent; }
+.btn.sm { min-height: 34px; padding: 4px 12px; font-size: 15px; }
+.btn.grande { width: 100%; min-height: 52px; font-size: 18px; }
+.btn[disabled] { opacity: .55; cursor: progress; }
+.btn-icon {
+  width: 42px; height: 42px; display: inline-grid; place-items: center; border-radius: var(--r-sm); border: 1px solid var(--line);
+  background: var(--surface); cursor: pointer; color: var(--ink); padding: 0;
+}
+.btn-icon svg { width: 20px; height: 20px; }
+.link-btn { background: none; border: 0; padding: 0; color: var(--link); text-decoration: underline; cursor: pointer; font-weight: 600; }
+
+.campo { display: grid; gap: 6px; min-width: 0; }
+.campo > label, .label { font-weight: 600; font-size: 15px; }
+.opc { font-weight: 400; color: var(--ink-3); }
+.dica { margin: 0; font-size: 14px; color: var(--ink-3); }
+input[type="text"], input[type="tel"], input[type="email"], input[type="password"], input[type="date"], input[type="time"], input:not([type]), select, textarea {
+  width: 100%; min-height: 44px; padding: 9px 12px; border-radius: var(--r-sm); border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink);
+}
+textarea { resize: vertical; min-height: 84px; }
+input:focus, select:focus, textarea:focus { border-color: var(--focus); outline: 2px solid color-mix(in srgb, var(--focus) 35%, transparent); outline-offset: 0; }
+.campo.invalido input, .campo.invalido select, .campo.invalido .chips-check { border-color: var(--bad); }
+.erro-msg { color: var(--bad); font-size: 14px; font-weight: 600; margin: 0; }
+.linha2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px 16px; }
+.check { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500; }
+.check input { width: 20px; height: 20px; accent-color: var(--primary); }
+
+/* ---------- etiquetas ---------- */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px; border-radius: 999px; font-size: 13px; font-weight: 600;
+  background: var(--surface-2); color: var(--ink-2); white-space: nowrap;
+}
+.badge.pend { background: var(--warn-soft); color: var(--warn); }
+.badge.conf { background: var(--ok-soft); color: var(--ok); }
+.badge.recu, .badge.canc { background: var(--bad-soft); color: var(--bad); }
+.badge.tipo { background: var(--primary-soft); color: var(--link); }
+
+/* ---------- calendário: barra ---------- */
+.cal-barra { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; margin-bottom: 14px; }
+.cal-nav { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.cal-nav h2 { font-family: var(--f-display); font-size: clamp(28px, 4vw, 36px); font-weight: 700; padding: 0 6px; min-width: 0; }
+.cal-ferr { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.cal-ferr select { width: auto; min-width: 0; max-width: 220px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r-sm); overflow: hidden; background: var(--surface); }
+.seg button { border: 0; background: transparent; padding: 8px 14px; min-height: 40px; font-weight: 600; cursor: pointer; color: var(--ink-2); }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--primary); color: var(--primary-ink); }
+.cal-filtros { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+.cal-filtros select { width: auto; max-width: 100%; }
+.legenda { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 14px; color: var(--ink-2); margin: 0 0 12px; }
+.legenda span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 12px; height: 12px; border-radius: 3px; background: var(--c); display: inline-block; }
+.sw.tracejado { background: transparent; border: 2px dashed var(--ink-3); }
+.sw.esp { background: var(--gold); transform: rotate(45deg) scale(.8); border-radius: 1px; }
+
+/* ---------- grade do mês ---------- */
+.mes { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; box-shadow: var(--shadow); }
+.mes-cab, .mes-grade { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.mes-cab div { padding: 8px 10px; font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); background: var(--surface-2); border-bottom: 1px solid var(--line); }
+.dia { min-height: 128px; padding: 6px 6px 8px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 3px; min-width: 0; cursor: pointer; position: relative; }
+.dia:nth-child(7n) { border-right: 0; }
+.dia:hover { background: color-mix(in srgb, var(--primary-soft) 45%, var(--surface)); }
+.dia.fora { background: var(--surface-2); cursor: default; }
+.dia.fora .dia-n { color: var(--ink-3); font-weight: 500; }
+.dia-top { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
+.dia-n { font-weight: 700; font-size: 16px; font-variant-numeric: tabular-nums; min-width: 26px; height: 26px; display: inline-grid; place-items: center; border-radius: 999px; flex: none; }
+.dia.hoje .dia-n { background: var(--gold); color: #fff; }
+.dia.passado:not(.fora) .dia-n { color: var(--ink-3); }
+.dia-esp { font-size: 12px; line-height: 1.25; color: var(--gold); font-weight: 600; font-style: italic; min-width: 0; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.ev {
+  --c: var(--primary);
+  display: block; width: 100%; text-align: left; border: 0; border-left: 4px solid var(--c); border-radius: 4px;
+  background: color-mix(in srgb, var(--c) 14%, var(--surface)); padding: 2px 6px; font-size: 13px; line-height: 1.3; cursor: pointer;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink);
+}
+.ev:hover { background: color-mix(in srgb, var(--c) 24%, var(--surface)); }
+.ev .h { font-weight: 700; font-variant-numeric: tabular-nums; }
+.ev.pend { background: var(--surface); outline: 1.5px dashed color-mix(in srgb, var(--c) 70%, var(--ink-3)); outline-offset: -1.5px; }
+.ev.extra { display: none; }
+.ev i { font-style: normal; font-weight: 600; color: var(--ink-2); }
+.so-celular { display: none; }
+.mais { border: 0; background: none; padding: 0 4px; text-align: left; font-size: 13px; font-weight: 700; color: var(--link); cursor: pointer; }
+
+/* ---------- semana e lista ---------- */
+.semana { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+.sem-dia { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 10px; min-width: 0; display: flex; flex-direction: column; gap: 8px; min-height: 220px; }
+.sem-dia.hoje { border-color: var(--gold); box-shadow: inset 0 3px 0 var(--gold); }
+.sem-cab { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; border-bottom: 1px solid var(--line); padding-bottom: 6px; }
+.sem-cab b { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); }
+.sem-cab .n { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.sem-vazio { color: var(--ink-3); font-size: 14px; }
+.esp-linha { font-size: 13px; color: var(--gold); font-weight: 600; font-style: italic; }
+
+.cartao-ev {
+  --c: var(--primary);
+  display: grid; gap: 2px; width: 100%; text-align: left; border: 1px solid var(--line); border-left: 5px solid var(--c);
+  background: color-mix(in srgb, var(--c) 7%, var(--surface)); border-radius: var(--r-sm); padding: 8px 10px; cursor: pointer; color: var(--ink);
+}
+.cartao-ev:hover { border-color: color-mix(in srgb, var(--c) 60%, var(--line)); }
+.cartao-ev.pend { border-style: dashed; border-left-style: solid; background: var(--surface); }
+.cartao-ev .ce-h { font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink-2); }
+.cartao-ev .ce-t { font-weight: 700; font-size: 16px; line-height: 1.25; }
+.cartao-ev .ce-m { font-size: 14px; color: var(--ink-2); }
+.cartao-ev .ce-b { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+
+.lista { display: grid; gap: 10px; }
+.lista-dia { display: grid; grid-template-columns: 78px minmax(0, 1fr); gap: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; }
+.lista-dia.hoje { border-color: var(--gold); }
+.lista-data { display: grid; align-content: start; justify-items: center; }
+.lista-data .n { font-family: var(--f-display); font-size: 36px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.lista-data .s { font-size: 13px; text-transform: uppercase; letter-spacing: .1em; color: var(--ink-2); font-weight: 700; }
+.lista-evs { display: grid; gap: 8px; min-width: 0; }
+.lista-evs .cartoes { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px; }
+.vazio { background: var(--surface); border: 1px dashed var(--line); border-radius: var(--r); padding: 28px; text-align: center; color: var(--ink-2); }
+.carregando { padding: 40px; text-align: center; color: var(--ink-2); }
+
+/* ---------- formulário ---------- */
+.form-layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 24px; align-items: start; }
+.form-main { display: grid; gap: 18px; min-width: 0; }
+.bloco { border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); padding: 18px 20px 20px; margin: 0; display: grid; gap: 16px; min-width: 0; }
+.bloco legend { padding: 0 6px; margin-left: -6px; font-weight: 700; font-size: 19px; display: flex; align-items: center; gap: 10px; }
+.passo { width: 28px; height: 28px; border-radius: 999px; background: var(--primary); color: var(--primary-ink); display: inline-grid; place-items: center; font-size: 15px; font-variant-numeric: tabular-nums; }
+.aviso { background: var(--primary-soft); border-radius: var(--r); padding: 12px 16px; color: var(--ink); margin: 0; }
+.nota-sec { background: var(--gold-soft); border: 1px solid color-mix(in srgb, var(--gold) 40%, var(--line)); border-radius: var(--r); padding: 12px 16px; margin: 0; }
+.chips-check { display: flex; flex-wrap: wrap; gap: 8px; border: 1px solid transparent; border-radius: var(--r-sm); }
+.chip-op { position: relative; }
+.chip-op input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.chip-op span {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 42px; padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px;
+  background: var(--surface); font-weight: 500; cursor: pointer;
+}
+.chip-op span::before { content: ""; width: 10px; height: 10px; border-radius: 3px; background: var(--c, var(--ink-3)); }
+.chip-op input:checked + span { background: color-mix(in srgb, var(--c, var(--primary)) 16%, var(--surface)); border-color: var(--c, var(--primary)); font-weight: 700; }
+.chip-op input:focus-visible + span { outline: 3px solid var(--focus); outline-offset: 2px; }
+.horario { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+.horario .hs { display: flex; align-items: center; gap: 8px; }
+.horario input[type="time"] { width: 130px; }
+.lista-datas { display: flex; flex-wrap: wrap; gap: 6px; }
+.lista-datas:empty { display: none; }
+.dchip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 4px 3px 10px; border-radius: 999px; background: var(--primary-soft); font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.dchip.prep { background: var(--gold-soft); }
+.dchip button { border: 0; background: transparent; width: 26px; height: 26px; border-radius: 999px; cursor: pointer; display: grid; place-items: center; color: var(--ink-2); }
+.dchip button:hover { background: color-mix(in srgb, var(--ink) 12%, transparent); }
+.dchip button svg { width: 14px; height: 14px; }
+.contagem { font-size: 14px; color: var(--ink-2); margin: 0; }
+.add-linha { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; }
+.add-linha input[type="date"] { width: 200px; }
+.check-card { display: flex; gap: 12px; align-items: flex-start; border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; cursor: pointer; }
+.check-card input { width: 22px; height: 22px; margin-top: 2px; accent-color: var(--primary); flex: none; }
+.check-card:has(input:checked) { border-color: var(--primary); background: var(--primary-soft); }
+.extra-box { display: grid; gap: 12px; border-top: 1px solid var(--line); padding-top: 14px; }
+.extra-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; align-items: end; }
+
+.resumo { position: sticky; top: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow); padding: 18px; display: grid; gap: 14px; }
+.resumo h3 { font-size: 19px; }
+.resumo dl { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 12px; font-size: 15px; }
+.resumo dt { color: var(--ink-3); }
+.resumo dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+.res-datas { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; max-height: 320px; overflow: auto; font-size: 14px; }
+.res-datas li { display: grid; gap: 2px; padding: 6px 8px; border-radius: var(--r-sm); background: var(--surface-2); }
+.res-datas li.conflito { background: var(--warn-soft); }
+.res-datas .rd-l { display: flex; justify-content: space-between; gap: 8px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.res-datas .rd-c { color: var(--warn); font-size: 13px; }
+.dispo { font-size: 14px; border-radius: var(--r-sm); padding: 8px 10px; margin: 0; }
+.dispo.ok { background: var(--ok-soft); color: var(--ok); }
+.dispo.warn { background: var(--warn-soft); color: var(--warn); }
+.dispo.info { background: var(--surface-2); color: var(--ink-2); }
+
+.sucesso { max-width: 720px; margin: 0 auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow); padding: 28px; display: grid; gap: 16px; }
+.selo { width: 56px; height: 56px; border-radius: 999px; background: var(--ok-soft); color: var(--ok); display: grid; place-items: center; }
+.selo svg { width: 30px; height: 30px; }
+.numero-pedido { display: inline-flex; align-items: baseline; gap: 10px; background: var(--gold-soft); border-radius: var(--r); padding: 10px 18px; }
+.numero-pedido b { font-family: var(--f-display); font-size: 44px; line-height: 1; font-variant-numeric: tabular-nums; }
+.acoes { display: flex; flex-wrap: wrap; gap: 10px; }
+
+/* ---------- meu pedido e secretaria ---------- */
+.form-linha { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; align-items: end; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; }
+.painel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px 20px; display: grid; gap: 14px; }
+.painel h3 { font-size: 22px; }
+.meta { color: var(--ink-2); font-size: 15px; margin: 0; }
+.datas-tab { width: 100%; border-collapse: collapse; font-size: 15px; }
+.datas-tab th { text-align: left; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); padding: 6px 8px; border-bottom: 1px solid var(--line); }
+.datas-tab td { padding: 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.datas-tab tr:last-child td { border-bottom: 0; }
+.tabela-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+.tabela-wrap .datas-tab { min-width: 860px; }
+.tabela-wrap .datas-tab tr.inativa td { color: var(--ink-3); }
+.tabela-wrap .datas-tab tr.inativa td.ev-nome { text-decoration: line-through; }
+.alerta { border-radius: var(--r-sm); padding: 10px 14px; margin: 0; font-size: 15px; }
+.alerta.erro { background: var(--bad-soft); color: var(--bad); }
+.alerta.warn { background: var(--warn-soft); color: var(--warn); }
+
+.sec-cab { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.sec-cab h2 { font-size: 28px; }
+.sec-abas { margin-bottom: 16px; }
+.contador { display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 999px; background: var(--warn); color: #fff; font-size: 13px; margin-left: 4px; }
+.pedidos { display: grid; gap: 14px; }
+.pedido-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px 18px; display: grid; gap: 12px; }
+.pc-cab { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px 20px; }
+.pc-cab h3 { font-size: 20px; }
+.pc-num { font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.pc-contato { font-size: 15px; text-align: right; }
+.pc-obs { background: var(--surface-2); border-radius: var(--r-sm); padding: 8px 12px; margin: 0; font-size: 15px; white-space: pre-wrap; }
+.pc-datas { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.pc-datas li { border: 1px solid var(--line); border-radius: var(--r-sm); padding: 8px 10px; display: grid; gap: 4px; }
+.pc-datas li.conflito { border-color: color-mix(in srgb, var(--warn) 50%, var(--line)); background: var(--warn-soft); }
+.pc-datas .conf { font-size: 14px; color: var(--warn); margin-left: 30px; }
+.filtros { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.filtros select, .filtros input { width: auto; flex: 1 1 150px; max-width: 260px; }
+.acoes-linha { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* ---------- janela (dialog) ---------- */
+dialog { border: 0; padding: 0; border-radius: 14px; background: var(--surface); color: var(--ink); width: min(640px, calc(100vw - 24px)); max-height: calc(100vh - 32px); box-shadow: 0 20px 60px rgba(0, 0, 0, .35); }
+dialog::backdrop { background: rgba(10, 16, 30, .55); }
+.dlg { display: flex; flex-direction: column; max-height: calc(100vh - 32px); }
+.dlg-cab { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 18px 20px 10px; }
+.dlg-cab h3 { font-size: 21px; }
+.dlg-corpo { padding: 4px 20px 16px; overflow: auto; display: grid; gap: 14px; }
+.dlg-rodape { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; padding: 12px 20px 18px; border-top: 1px solid var(--line); }
+.dlg-rodape:empty { display: none; }
+.pares { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 16px; margin: 0; }
+.pares dt { color: var(--ink-3); }
+.pares dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+.opcoes { display: grid; gap: 8px; }
+.opcao { display: flex; gap: 10px; align-items: flex-start; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 10px 12px; cursor: pointer; }
+.opcao input { margin-top: 4px; width: 18px; height: 18px; accent-color: var(--primary); flex: none; }
+.opcao:has(input:checked) { border-color: var(--primary); background: var(--primary-soft); }
+.opcao small { display: block; color: var(--ink-3); font-size: 14px; }
+
+.toast {
+  position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%) translateY(20px); opacity: 0; pointer-events: none;
+  background: var(--ink); color: var(--bg); padding: 12px 18px; border-radius: 10px; font-weight: 600; box-shadow: var(--shadow); transition: .2s; z-index: 50; max-width: calc(100vw - 32px);
+}
+.toast.on { opacity: 1; transform: translateX(-50%); }
+.toast.erro { background: var(--bad); color: #fff; }
+
+footer.rodape { border-top: 1px solid var(--line); padding-block: 18px 28px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px 24px; font-size: 15px; color: var(--ink-2); }
+footer.rodape .links { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+.erro-geral { max-width: 720px; margin: 40px auto; }
+.print-only { display: none; }
+
+/* ---------- celular ---------- */
+@media (max-width: 960px) {
+  .form-layout { grid-template-columns: minmax(0, 1fr); }
+  .resumo { position: static; }
+  .semana { grid-template-columns: minmax(0, 1fr); }
+  .sem-dia { min-height: 0; }
+}
+@media (max-width: 700px) {
+  .band-in { padding-block: 16px 0; }
+  .brand { padding-bottom: 8px; }
+  .brand-logo { width: 50px; height: 50px; }
+  .tab { padding: 10px 12px 11px; font-size: 15px; }
+  main { padding-block: 16px 32px; }
+  .brand h1 { font-size: 25px; }
+  .cal-barra { gap: 10px; margin-bottom: 10px; }
+  .cal-nav { width: 100%; gap: 6px; }
+  .cal-nav h2 { flex: 1; font-size: 24px; text-align: center; padding: 0; }
+  .cal-nav .btn-icon { width: 40px; height: 40px; }
+  .cal-ferr { width: 100%; flex-wrap: nowrap; }
+  .cal-ferr .seg { flex: 1; }
+  .cal-ferr .seg button { flex: 1; padding: 8px 6px; font-size: 15px; }
+  #btnImprimir { display: none; }
+  .so-grande { display: none; }
+  .so-celular { display: inline; }
+  .cal-filtros { flex-wrap: nowrap; }
+  #irMes, #irAno { display: none; }
+  .cal-filtros select { flex: 1 1 0; min-width: 0; font-size: 15px; padding-inline: 8px; }
+  .legenda { font-size: 13px; gap: 4px 12px; }
+  .dia { min-height: 64px; padding: 4px 3px; gap: 2px; }
+  .dia-n { font-size: 14px; min-width: 24px; height: 24px; }
+  .dia-esp { display: none; }
+  .dia.tem-esp .dia-n { box-shadow: inset 0 -2px 0 var(--gold); border-radius: 4px; }
+  .dia.hoje .dia-n { border-radius: 999px; box-shadow: none; }
+  .ev-pontos { display: flex; flex-wrap: wrap; gap: 3px; padding: 0 2px; }
+  .mes .ev, .mes .mais { display: none; }
+  .mes-cab div { padding: 6px 2px; text-align: center; font-size: 11px; letter-spacing: .04em; }
+  .lista-dia { grid-template-columns: 52px minmax(0, 1fr); gap: 10px; padding: 10px; }
+  .lista-data .n { font-size: 28px; }
+  .bloco { padding: 14px 14px 16px; }
+  .pc-contato { text-align: left; }
+  .pares { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .pares dd { margin-bottom: 8px; }
+}
+@media (min-width: 701px) { .ev-pontos { display: none; } }
+.ponto { width: 8px; height: 8px; border-radius: 999px; background: var(--c); }
+.ponto.pend { background: transparent; border: 1.5px solid var(--c); }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* ---------- impressão ---------- */
+@page { size: A4 landscape; margin: 10mm; }
+@media print {
+  :root, :root[data-theme="dark"], :root:not([data-theme="light"]) {
+    --bg: #fff; --surface: #fff; --surface-2: #f1f3f7; --ink: #000; --ink-2: #333; --ink-3: #666; --line: #b9c0cc;
+    --gold: #7a5a12; --primary-soft: #eef1f7; color-scheme: light;
+  }
+  body { font-size: 11px; }
+  .band, .faixa-demo, .cal-barra, .cal-filtros, footer.rodape, .toast, dialog, .no-print { display: none !important; }
+  main { padding: 0; }
+  .wrap { max-width: none; padding: 0; }
+  .print-only { display: block; }
+  .print-cab { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid #000; margin-bottom: 6px; padding-bottom: 4px; }
+  .print-cab h1 { font-family: var(--f-display); font-size: 22px; }
+  .print-id { display: flex; align-items: center; gap: 8px; }
+  .print-logo { width: 34px; height: 34px; border-radius: 50%; }
+  .print-logo:not([src]) { display: none; }
+  .print-cab h2 { font-size: 16px; }
+  .mes { box-shadow: none; border-radius: 0; }
+  .dia { min-height: 25mm; padding: 3px; break-inside: avoid; }
+  .mes-cab div { padding: 3px 6px; }
+  .dia-esp { display: block; -webkit-line-clamp: unset; font-size: 9px; }
+  .mes .ev, .mes .ev.extra { display: block; white-space: normal; font-size: 9px; padding: 1px 3px; border-left-width: 3px; background: #fff; }
+  .mes .mais, .ev-pontos { display: none !important; }
+  .dia-n { font-size: 12px; height: auto; }
+  .dia.hoje .dia-n { background: none; color: #000; }
+  .semana { grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+  .sem-dia { min-height: 0; padding: 4px; }
+  .cartao-ev { padding: 3px 5px; break-inside: avoid; }
+  .cartao-ev .ce-t { font-size: 11px; }
+  .cartao-ev .ce-h, .cartao-ev .ce-m, .badge { font-size: 9px; }
+  .lista-dia { break-inside: avoid; padding: 6px; }
+  .lista-evs .cartoes { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .legenda { font-size: 9px; margin: 4px 0 0; }
+  .pagina:not(#pg-calendario) { display: none !important; }
+}
+</style>
+</head>
+<body>
+<script src="config.js"></script>
+
+<header class="band">
+  <div class="wrap band-in">
+    <div class="brand">
+      <img class="brand-logo" id="logoParoquia" alt="Logo da paróquia" width="64" height="64" src="logo.png">
+      <div>
+        <p class="brand-eyebrow" id="tituloCal">Calendário Paroquial</p>
+        <h1 id="nomeParoquia">Paróquia</h1>
+      </div>
+    </div>
+    <nav class="tabs" aria-label="Seções">
+      <button class="tab" data-ir="calendario">Calendário</button>
+      <button class="tab" data-ir="reservar">Reservar espaço</button>
+      <button class="tab" data-ir="meu-pedido">Meu pedido</button>
+      <button class="tab" data-ir="secretaria" id="tabSecretaria" hidden>Secretaria</button>
+      <a class="tab" id="tabTelaCheia" href="#" target="_blank" rel="noopener" hidden>Abrir em tela cheia ↗</a>
+    </nav>
+  </div>
+</header>
+<div class="faixa-demo" id="faixaDemo" hidden><div class="wrap" id="faixaDemoTexto"></div></div>
+
+<main class="wrap" id="principal">
+
+  <!-- ===================== CALENDÁRIO ===================== -->
+  <section class="pagina" id="pg-calendario">
+    <div class="print-only print-cab"><div class="print-id"><img id="logoPrint" class="print-logo" alt=""><h1 class="js-nome"></h1></div><h2 id="printTitulo"></h2></div>
+    <div class="cal-barra">
+      <div class="cal-nav">
+        <button class="btn-icon" data-acao="anterior" aria-label="Anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <h2 id="calTitulo" class="num">&nbsp;</h2>
+        <button class="btn-icon" data-acao="proximo" aria-label="Próximo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
+        <button class="btn sm ghost" data-acao="hoje">Hoje</button>
+      </div>
+      <div class="cal-ferr">
+        <div class="seg" role="group" aria-label="Como ver">
+          <button data-vista="mes" aria-pressed="true">Mês</button>
+          <button data-vista="semana" aria-pressed="false">Semana</button>
+          <button data-vista="lista" aria-pressed="false">Lista</button>
+        </div>
+        <button class="btn" data-acao="exportar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
+          <span class="so-grande">Baixar planilha</span><span class="so-celular">Planilha</span>
+        </button>
+        <button class="btn ghost" data-acao="imprimir" id="btnImprimir">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 18H4a1 1 0 0 1-1-1v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1h-2M6 14h12v7H6z"/></svg>
+          Imprimir
+        </button>
+      </div>
+    </div>
+    <div class="cal-filtros">
+      <select id="irMes" aria-label="Ir para o mês"></select>
+      <select id="irAno" aria-label="Ir para o ano"></select>
+      <select id="fLocal" aria-label="Filtrar por local"><option value="">Todos os locais</option></select>
+      <select id="fPastoral" aria-label="Filtrar por pastoral"><option value="">Todas as pastorais</option></select>
+    </div>
+    <div class="legenda" id="legenda"></div>
+    <div id="calCorpo"><div class="carregando">Carregando…</div></div>
+  </section>
+
+  <!-- ===================== RESERVAR ===================== -->
+  <section class="pagina" id="pg-reservar" hidden>
+    <div id="formArea">
+      <div class="pg-cab">
+        <h2>Reservar um espaço</h2>
+        <p>Preencha os dados do evento e escolha as datas. Se precisar do local antes do evento para arrumar, reserve também os dias de preparação.</p>
+      </div>
+      <div class="form-layout">
+        <form id="formReserva" class="form-main" novalidate>
+          <p class="aviso" id="avisoForm" hidden></p>
+          <p class="nota-sec" id="notaSecretaria" hidden><b>Lançamento pela secretaria.</b> Esta reserva entra já confirmada e pode ter datas passadas. <button type="button" class="link-btn" data-acao="sair-modo-sec">Voltar ao modo normal</button></p>
+
+          <fieldset class="bloco">
+            <legend><span class="passo">1</span>Quem está pedindo</legend>
+            <div class="campo" data-campo="pastoral">
+              <label for="rPastoral">Pastoral ou movimento</label>
+              <select id="rPastoral"></select>
+              <input type="text" id="rPastoralOutra" placeholder="Escreva o nome da pastoral ou movimento" hidden>
+            </div>
+            <div class="linha2">
+              <div class="campo" data-campo="responsavel">
+                <label for="rResp">Nome do responsável</label>
+                <input type="text" id="rResp" autocomplete="name">
+              </div>
+              <div class="campo" data-campo="telefone">
+                <label for="rTel">Telefone / WhatsApp</label>
+                <input type="tel" id="rTel" inputmode="tel" autocomplete="tel" placeholder="(11) 91234-5678">
+              </div>
+            </div>
+            <div class="campo" data-campo="email">
+              <label for="rEmail">E-mail <span class="opc">(opcional: para receber a confirmação)</span></label>
+              <input type="email" id="rEmail" autocomplete="email">
+            </div>
+          </fieldset>
+
+          <fieldset class="bloco">
+            <legend><span class="passo">2</span>O evento</legend>
+            <div class="campo" data-campo="evento">
+              <label for="rEvento">Nome do evento</label>
+              <input type="text" id="rEvento" placeholder="Ex.: Festa Junina, Reunião mensal, Retiro da Crisma" maxlength="150">
+            </div>
+            <div class="campo" data-campo="locais">
+              <span class="label" id="lblLocais">Local</span>
+              <p class="dica">Marque todos os espaços que vai usar.</p>
+              <div class="chips-check" id="rLocais" role="group" aria-labelledby="lblLocais"></div>
+            </div>
+            <div class="campo">
+              <label for="rObs">Observações para a secretaria <span class="opc">(opcional)</span></label>
+              <textarea id="rObs" rows="3" maxlength="1500" placeholder="Ex.: vamos precisar de mesas e cadeiras; o evento é aberto à comunidade"></textarea>
+            </div>
+          </fieldset>
+
+          <fieldset class="bloco">
+            <legend><span class="passo">3</span>Quando vai ser</legend>
+            <div class="linha2">
+              <div class="campo" data-campo="data">
+                <label for="rData">Data do evento</label>
+                <input type="date" id="rData">
+              </div>
+              <div class="campo" data-campo="horario">
+                <span class="label">Horário</span>
+                <div class="horario">
+                  <span class="hs"><input type="time" id="rIni" aria-label="Início" value="19:00"> <span>às</span> <input type="time" id="rFim" aria-label="Término" value="21:00"></span>
+                  <label class="check"><input type="checkbox" id="rDiaInteiro"> Dia inteiro</label>
+                </div>
+              </div>
+            </div>
+            <div class="linha2">
+              <div class="campo">
+                <label for="rRep">Esse evento se repete?</label>
+                <select id="rRep"></select>
+              </div>
+              <div class="campo" id="campoAte" hidden>
+                <label for="rAte">Repetir até</label>
+                <input type="date" id="rAte">
+              </div>
+            </div>
+            <p class="contagem" id="contPrincipais"></p>
+            <div class="lista-datas" id="listaPrincipais"></div>
+            <div class="campo">
+              <label for="rAvulsa">Tem outra data com o mesmo horário? <span class="opc">(opcional)</span></label>
+              <div class="add-linha">
+                <input type="date" id="rAvulsa">
+                <button type="button" class="btn" data-acao="add-avulsa">Adicionar data</button>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset class="bloco">
+            <legend><span class="passo">4</span>Dias de preparação <span class="opc">&nbsp;(opcional)</span></legend>
+            <p class="dica" style="margin-top:-6px">Precisa do local antes ou depois do evento para arrumar, ensaiar ou desmontar? Reserve aqui também, para ninguém marcar outra coisa no mesmo lugar.</p>
+            <label class="check-card">
+              <input type="checkbox" id="rVespera">
+              <span><b>Reservar também o dia anterior</b> para preparação/montagem<br><span class="dica" id="vesperaInfo">Ex.: evento no domingo → reserva o sábado.</span></span>
+            </label>
+            <div class="horario" id="vesperaHorario" hidden>
+              <label class="check"><input type="checkbox" id="vDiaInteiro" checked> Dia inteiro</label>
+              <span class="hs" id="vHoras" hidden><span>das</span> <input type="time" id="vIni" aria-label="Início da preparação" value="08:00"> <span>às</span> <input type="time" id="vFim" aria-label="Término da preparação" value="18:00"></span>
+            </div>
+            <div class="extra-box">
+              <span class="label">Outra data de preparação, ensaio ou desmontagem</span>
+              <div class="extra-grid">
+                <div class="campo"><label for="xData">Data</label><input type="date" id="xData"></div>
+                <div class="campo"><label for="xTipo">Para quê</label><select id="xTipo"></select></div>
+                <div class="campo">
+                  <span class="label">Horário</span>
+                  <label class="check"><input type="checkbox" id="xDiaInteiro" checked> Dia inteiro</label>
+                </div>
+              </div>
+              <div class="horario" id="xHoras" hidden><span class="hs"><span>das</span> <input type="time" id="xIni" aria-label="Início" value="08:00"> <span>às</span> <input type="time" id="xFim" aria-label="Término" value="12:00"></span></div>
+              <div><button type="button" class="btn" data-acao="add-extra">Adicionar esta data</button></div>
+              <div class="lista-datas" id="listaExtras"></div>
+            </div>
+          </fieldset>
+        </form>
+
+        <aside class="resumo" aria-live="polite">
+          <h3>Resumo do pedido</h3>
+          <div id="resumoCorpo"></div>
+          <p class="dispo info" id="dispo" hidden></p>
+          <p class="alerta erro" id="erroEnvio" hidden></p>
+          <button class="btn primario grande" type="submit" form="formReserva" id="btnEnviar">Enviar pedido</button>
+          <p class="dica" id="dicaEnvio"></p>
+        </aside>
+      </div>
+    </div>
+    <div id="sucessoArea" hidden></div>
+  </section>
+
+  <!-- ===================== MEU PEDIDO ===================== -->
+  <section class="pagina" id="pg-meu-pedido" hidden>
+    <div class="estreito" style="display:grid;gap:16px">
+      <div class="pg-cab" style="margin:0">
+        <h2>Meu pedido</h2>
+        <p>Veja se o seu pedido já foi aprovado ou cancele datas que não vai mais usar. Use o número do pedido e o telefone informado no pedido.</p>
+      </div>
+      <form class="form-linha" id="formConsulta" novalidate>
+        <div class="campo"><label for="cNum">Número do pedido</label><input type="text" id="cNum" inputmode="numeric" placeholder="Ex.: 42"></div>
+        <div class="campo"><label for="cTel">Telefone do pedido</label><input type="tel" id="cTel" inputmode="tel" placeholder="(11) 91234-5678"></div>
+        <button class="btn primario" type="submit" id="btnConsultar">Consultar</button>
+      </form>
+      <div id="consultaRes"></div>
+    </div>
+  </section>
+
+  <!-- ===================== SECRETARIA ===================== -->
+  <section class="pagina" id="pg-secretaria" hidden>
+    <div id="secLogin" class="estreito" style="display:grid;gap:16px">
+      <div class="pg-cab" style="margin:0">
+        <h2>Área da secretaria</h2>
+        <p>Para aprovar ou recusar pedidos, remarcar, cancelar e lançar reservas já confirmadas.</p>
+      </div>
+      <form class="form-linha" id="formLogin" novalidate>
+        <div class="campo"><label for="sSenha">Senha da secretaria</label><input type="password" id="sSenha" autocomplete="current-password"></div>
+        <button class="btn primario" type="submit" id="btnEntrar">Entrar</button>
+      </form>
+      <p class="dica">A senha fica na aba “Configurações” da planilha do calendário.</p>
+    </div>
+    <div id="secPainel" hidden>
+      <div class="sec-cab">
+        <h2>Área da secretaria</h2>
+        <div class="acoes">
+          <button class="btn primario" data-acao="sec-nova">Nova reserva confirmada</button>
+          <button class="btn" data-acao="sec-atualizar">Atualizar</button>
+          <button class="btn ghost" data-acao="sec-sair">Sair</button>
+        </div>
+      </div>
+      <div class="seg sec-abas" role="group" aria-label="Lista">
+        <button data-secaba="pendentes" aria-pressed="true">Aguardando aprovação <span class="contador" id="contPend">0</span></button>
+        <button data-secaba="todas" aria-pressed="false">Todas as reservas</button>
+      </div>
+      <div id="secPendentes" class="pedidos"></div>
+      <div id="secTodas" hidden>
+        <div class="filtros">
+          <select id="tAno" aria-label="Ano"></select>
+          <select id="tMes" aria-label="Mês"></select>
+          <select id="tStatus" aria-label="Situação">
+            <option value="">Todas as situações</option><option>Pendente</option><option>Confirmado</option><option>Recusado</option><option>Cancelado</option>
+          </select>
+          <select id="tLocal" aria-label="Local"><option value="">Todos os locais</option></select>
+          <input type="text" id="tBusca" placeholder="Buscar evento, pastoral, nome ou nº" aria-label="Buscar">
+        </div>
+        <div class="tabela-wrap"><table class="datas-tab" id="tabTodas"></table></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="erro-geral" id="erroGeral" hidden></div>
+</main>
+
+<footer class="wrap rodape">
+  <div><span class="js-nome"></span><span id="rodapeContato"></span></div>
+  <div class="links">
+    <button class="link-btn" data-acao="copiar-link" data-pagina="">Copiar link do calendário</button>
+    <button class="link-btn" data-acao="copiar-link" data-pagina="reservar">Copiar link do formulário</button>
+    <button class="link-btn" data-ir="secretaria">Área da secretaria</button>
+  </div>
+</footer>
+
+<dialog id="dlg" aria-labelledby="dlgTitulo">
+  <div class="dlg">
+    <div class="dlg-cab"><h3 id="dlgTitulo"></h3><button class="btn-icon" data-acao="fechar-dlg" aria-label="Fechar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="dlg-corpo" id="dlgCorpo"></div>
+    <div class="dlg-rodape" id="dlgRodape"></div>
+  </div>
+</dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ================================================================ base
+  var EXCELJS_URL = 'https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js';
+  var API_URL = String(window.CALENDARIO_API || '').trim();
+  var MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+  var DIAS = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'];
+  var DIAS_C = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
+  var DIAS_NOME = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
+  var PALETA = ['#2f6db3', '#b4472c', '#2b8556', '#8a4fb3', '#b07a12', '#1d8a8f', '#b23a70', '#5f7a1f', '#4b5fc6', '#8c5a3a', '#467089', '#9a3fa0'];
+  var ST_ROTULO = { Pendente: 'Aguardando aprovação', Confirmado: 'Confirmado', Recusado: 'Recusado', Cancelado: 'Cancelado' };
+  var ST_CLASSE = { Pendente: 'pend', Confirmado: 'conf', Recusado: 'recu', Cancelado: 'canc' };
+  var ICO_X = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+  var ICO_OK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>';
+
+  var CFG = {};
+  var S = {
+    hoje: isoDe(new Date()),
+    url: window.__urlSite !== undefined ? window.__urlSite : (/^https?:$/.test(location.protocol) ? location.origin + location.pathname.replace(/index\.html$/, '') : ''),
+    anos: {},
+    carregandoAno: {},
+    vista: 'mes',
+    cursor: null,
+    fLocal: '',
+    fPastoral: '',
+    pagina: 'calendario',
+    admin: { senha: null, linhas: [], ano: null, aba: 'pendentes' },
+    modoSec: false
+  };
+
+  function $(s, el) { return (el || document).querySelector(s); }
+  function $$(s, el) { return Array.prototype.slice.call((el || document).querySelectorAll(s)); }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function guardar(k, v) { try { localStorage.setItem('calparoquial.' + k, v); } catch (e) { /* sem armazenamento */ } }
+  function ler(k) { try { return localStorage.getItem('calparoquial.' + k); } catch (e) { return null; } }
+  function guardarSessao(k, v) { try { if (v == null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); } catch (e) { /* ok */ } }
+  function lerSessao(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }
+  function lerJSON(k) { try { return JSON.parse(ler(k) || 'null'); } catch (e) { return null; } }
+
+  // chamada ao servidor: API do Google Apps Script (endereço no config.js)
+  // POST com corpo em texto evita a "pré-checagem" de CORS; o Google responde
+  // com um redirecionamento que o navegador segue sozinho.
+  function api(nome) {
+    var args = Array.prototype.slice.call(arguments, 1).map(function (a) { return a === undefined ? null : a; });
+    if (window.__transporte) return window.__transporte(nome, args);
+    if (!/^https?:\/\//.test(API_URL)) {
+      return Promise.reject(new Error('O endereço do servidor ainda não foi colocado no arquivo config.js.'));
+    }
+    return fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ acao: nome, args: args }),
+      redirect: 'follow',
+      cache: 'no-store'
+    }).then(function (r) {
+      if (!r.ok) throw new Error('O servidor respondeu com erro (' + r.status + '). Tente de novo em instantes.');
+      return r.text();
+    }, function () {
+      throw new Error('Não foi possível falar com o servidor. Confira a internet e tente de novo.');
+    }).then(function (texto) {
+      var j;
+      try { j = JSON.parse(texto); } catch (e) {
+        throw new Error('O servidor respondeu algo inesperado. Confira se o endereço no config.js termina em /exec e se a implantação está com acesso para “Qualquer pessoa”.');
+      }
+      if (!j || !j.ok) throw new Error((j && j.erro) || 'Erro no servidor.');
+      return j.dados;
+    });
+  }
+
+  // ================================================================ datas
+  function isoDe(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function iso(a, m, d) { return a + '-' + pad(m) + '-' + pad(d); }
+  function partes(s) { var p = s.split('-'); return { a: +p[0], m: +p[1], d: +p[2] }; }
+  function dataDe(s) { var p = partes(s); return new Date(p.a, p.m - 1, p.d, 12); }
+  function somaDias(s, n) { var d = dataDe(s); d.setDate(d.getDate() + n); return isoDe(d); }
+  function diaSem(s) { return dataDe(s).getDay(); }
+  function diasNoMes(a, m) { return new Date(a, m, 0).getDate(); }
+  function inicioSemana(s) { return somaDias(s, -diaSem(s)); }
+  function br(s) { var p = partes(s); return pad(p.d) + '/' + pad(p.m) + '/' + p.a; }
+  function brCurto(s) { var p = partes(s); return DIAS_C[diaSem(s)] + ', ' + pad(p.d) + '/' + pad(p.m); }
+  function brMedio(s) { return DIAS_C[diaSem(s)] + ', ' + br(s); }
+  function brLongo(s) { var p = partes(s); return DIAS[diaSem(s)] + ', ' + p.d + ' de ' + MESES[p.m - 1] + ' de ' + p.a; }
+  function valido(s) { return /^\d{4}-\d{2}-\d{2}$/.test(s || '') && +s.slice(0, 4) >= 2000 && +s.slice(0, 4) <= 2100; }
+  function horario(e) { return e.diaInteiro || !e.inicio ? 'Dia inteiro' : e.inicio + (e.fim ? '–' + e.fim : ''); }
+  function minutos(h) { var p = String(h || '').split(':'); return (+p[0]) * 60 + (+p[1] || 0); }
+
+  function pascoa(Y) {
+    var a = Y % 19, b = Math.floor(Y / 100), c = Y % 100, d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25),
+      g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4,
+      l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451),
+      mes = Math.floor((h + l - 7 * m + 114) / 31), dia = ((h + l - 7 * m + 114) % 31) + 1;
+    return iso(Y, mes, dia);
+  }
+
+  var cacheEsp = {};
+  /** Feriados nacionais, datas litúrgicas principais e datas da paróquia. */
+  function especiais(a) {
+    if (cacheEsp[a]) return cacheEsp[a];
+    var out = {};
+    function add(s, nome, tipo) { (out[s] = out[s] || []).push({ nome: nome, tipo: tipo }); }
+    (CFG.datasEspeciais || []).forEach(function (d) {
+      if (d.ano && d.ano !== a) return;
+      if (d.mes < 1 || d.mes > 12 || d.dia < 1 || d.dia > diasNoMes(a, d.mes)) return;
+      add(iso(a, d.mes, d.dia), d.nome, 'paroquia');
+    });
+    if (CFG.mostrarFeriados !== false) {
+      var P = pascoa(a);
+      add(iso(a, 1, 1), 'Santa Maria, Mãe de Deus · Confraternização Universal', 'feriado');
+      for (var d = 2; d <= 8; d++) if (diaSem(iso(a, 1, d)) === 0) add(iso(a, 1, d), 'Epifania do Senhor', 'liturgia');
+      add(somaDias(P, -47), 'Carnaval', 'feriado');
+      add(somaDias(P, -46), 'Quarta-feira de Cinzas', 'liturgia');
+      add(somaDias(P, -7), 'Domingo de Ramos', 'liturgia');
+      add(somaDias(P, -3), 'Quinta-feira Santa', 'liturgia');
+      add(somaDias(P, -2), 'Sexta-feira Santa', 'feriado');
+      add(P, 'Páscoa do Senhor', 'liturgia');
+      add(iso(a, 4, 21), 'Tiradentes', 'feriado');
+      add(iso(a, 5, 1), 'Dia do Trabalho · São José Operário', 'feriado');
+      add(somaDias(P, 42), 'Ascensão do Senhor', 'liturgia');
+      add(somaDias(P, 49), 'Pentecostes', 'liturgia');
+      add(somaDias(P, 56), 'Santíssima Trindade', 'liturgia');
+      add(somaDias(P, 60), 'Corpus Christi', 'liturgia');
+      add(iso(a, 9, 7), 'Independência do Brasil', 'feriado');
+      add(iso(a, 10, 12), 'Nossa Senhora Aparecida', 'feriado');
+      add(iso(a, 11, 2), 'Finados', 'feriado');
+      add(iso(a, 11, 15), 'Proclamação da República', 'feriado');
+      add(iso(a, 11, 20), 'Consciência Negra', 'feriado');
+      var adv = iso(a, 11, 27);
+      while (diaSem(adv) !== 0) adv = somaDias(adv, 1);
+      add(somaDias(adv, -7), 'Cristo Rei', 'liturgia');
+      add(adv, '1º Domingo do Advento', 'liturgia');
+      add(iso(a, 12, 8), 'Imaculada Conceição', 'liturgia');
+      add(iso(a, 12, 25), 'Natal do Senhor', 'feriado');
+    }
+    cacheEsp[a] = out;
+    return out;
+  }
+  function especiaisDe(s) { return especiais(+s.slice(0, 4))[s] || []; }
+
+  // ================================================================ cores / locais
+  function corLocal(nome) {
+    var lista = CFG.locais || [];
+    var k = String(nome || '').toLowerCase();
+    for (var i = 0; i < lista.length; i++) {
+      if (lista[i].nome.toLowerCase() === k) return lista[i].cor || PALETA[i % PALETA.length];
+    }
+    var h = 0;
+    for (var j = 0; j < k.length; j++) h = (h * 31 + k.charCodeAt(j)) >>> 0;
+    return PALETA[h % PALETA.length];
+  }
+  function corEvento(e) { return corLocal((e.locais || [])[0]); }
+
+  // ================================================================ eventos carregados
+  function garantirAno(a) {
+    a = String(a);
+    if (S.anos[a]) return Promise.resolve(S.anos[a]);
+    if (S.carregandoAno[a]) return S.carregandoAno[a];
+    S.carregandoAno[a] = api('listarEventos', +a).then(function (r) {
+      S.anos[a] = r.eventos;
+      delete S.carregandoAno[a];
+      return r.eventos;
+    }, function (e) { delete S.carregandoAno[a]; throw e; });
+    return S.carregandoAno[a];
+  }
+  function recarregarAnos() {
+    var anos = Object.keys(S.anos);
+    S.anos = {};
+    return Promise.all(anos.map(garantirAno));
+  }
+  function passaFiltro(e) {
+    if (S.fLocal && (e.locais || []).indexOf(S.fLocal) < 0) return false;
+    if (S.fPastoral && e.pastoral !== S.fPastoral) return false;
+    return true;
+  }
+  function eventosEntre(ini, fim, opts) {
+    opts = opts || {};
+    var out = [];
+    var a0 = +ini.slice(0, 4), a1 = +fim.slice(0, 4);
+    for (var a = a0; a <= a1; a++) {
+      (S.anos[a] || []).forEach(function (e) {
+        if (e.data < ini || e.data > fim) return;
+        if (opts.semPendentes && e.status === 'Pendente') return;
+        if (!opts.semFiltro && !passaFiltro(e)) return;
+        out.push(e);
+      });
+    }
+    return out.sort(ordenar);
+  }
+  function ordenar(a, b) {
+    if (a.data !== b.data) return a.data < b.data ? -1 : 1;
+    var ha = a.diaInteiro ? '' : a.inicio, hb = b.diaInteiro ? '' : b.inicio;
+    if (ha !== hb) return ha < hb ? -1 : 1;
+    return String(a.evento).localeCompare(String(b.evento), 'pt-BR');
+  }
+  function porDia(lista) {
+    var m = {};
+    lista.forEach(function (e) { (m[e.data] = m[e.data] || []).push(e); });
+    return m;
+  }
+  function acharEvento(id) {
+    var achado = null;
+    Object.keys(S.anos).some(function (a) {
+      achado = (S.anos[a] || []).filter(function (e) { return e.id === id; })[0] || null;
+      return !!achado;
+    });
+    return achado;
+  }
+
+  // ================================================================ navegação
+  /** true quando a página está incorporada em outro site (ex.: Google Sites). */
+  function dentroDeOutroSite() {
+    try { return window.self !== window.top; } catch (e) { return true; }
+  }
+
+  function irPara(pagina, semRolar) {
+    if (pagina === 'secretaria') $('#tabSecretaria').hidden = false;
+    if (!$('#pg-' + pagina)) pagina = 'calendario';
+    S.pagina = pagina;
+    $$('.pagina').forEach(function (p) { p.hidden = p.id !== 'pg-' + pagina; });
+    $$('.tab').forEach(function (t) {
+      if (t.getAttribute('data-ir') === pagina) t.setAttribute('aria-current', 'page');
+      else t.removeAttribute('aria-current');
+    });
+    if (pagina === 'calendario') renderCalendario();
+    if (pagina === 'reservar') { atualizarForm(); }
+    if (pagina === 'secretaria') abrirSecretaria();
+    if (S.embutido) $('#tabTelaCheia').href = S.url + (pagina === 'calendario' ? '' : '?pagina=' + pagina);
+    if (!semRolar) window.scrollTo(0, 0);
+  }
+
+  // ================================================================ toast e janela
+  var toastT;
+  function toast(msg, erro) {
+    var t = $('#toast');
+    t.textContent = msg;
+    t.className = 'toast on' + (erro ? ' erro' : '');
+    clearTimeout(toastT);
+    toastT = setTimeout(function () { t.className = 'toast' + (erro ? ' erro' : ''); }, erro ? 6000 : 3500);
+  }
+
+  var dlgAoFechar = null;
+  function abrirJanela(titulo, corpoHtml, botoes, aoFechar) {
+    var dlg = $('#dlg');
+    $('#dlgTitulo').textContent = titulo;
+    $('#dlgCorpo').innerHTML = corpoHtml;
+    var rod = $('#dlgRodape');
+    rod.innerHTML = '';
+    (botoes || []).forEach(function (b) {
+      var el = document.createElement('button');
+      el.type = 'button';
+      el.className = 'btn ' + (b.classe || '');
+      el.innerHTML = b.html || esc(b.texto);
+      el.addEventListener('click', function () { b.acao(el); });
+      rod.appendChild(el);
+    });
+    dlgAoFechar = aoFechar || null;
+    if (!dlg.open) {
+      if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
+    }
+    var foco = $('#dlgCorpo input, #dlgCorpo select, #dlgCorpo textarea');
+    if (foco) setTimeout(function () { foco.focus(); }, 30);
+    return dlg;
+  }
+  function fecharJanela() {
+    var dlg = $('#dlg');
+    if (dlg.open) { if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); }
+  }
+  $('#dlg').addEventListener('close', function () {
+    var f = dlgAoFechar;
+    dlgAoFechar = null;
+    if (f) f();
+  });
+  $('#dlg').addEventListener('click', function (ev) { if (ev.target === this) fecharJanela(); });
+
+  function confirmar(titulo, msgHtml, textoOk, classe) {
+    return new Promise(function (ok) {
+      var resp = false;
+      abrirJanela(titulo, msgHtml, [
+        { texto: 'Voltar', classe: 'ghost', acao: function () { fecharJanela(); } },
+        { texto: textoOk || 'Confirmar', classe: classe || 'primario', acao: function () { resp = true; fecharJanela(); } }
+      ], function () { ok(resp); });
+    });
+  }
+  function pedirTexto(titulo, rotulo, textoOk, classe, opcional) {
+    return new Promise(function (ok) {
+      var resp = null;
+      abrirJanela(titulo,
+        '<div class="campo"><label for="dlgTexto">' + esc(rotulo) + (opcional ? ' <span class="opc">(opcional)</span>' : '') + '</label>' +
+        '<textarea id="dlgTexto" rows="3" maxlength="500"></textarea></div>', [
+          { texto: 'Voltar', classe: 'ghost', acao: function () { fecharJanela(); } },
+          { texto: textoOk, classe: classe || 'primario', acao: function () { resp = $('#dlgTexto').value.trim(); fecharJanela(); } }
+        ], function () { ok(resp); });
+    });
+  }
+  function ocupado(btn, sim, texto) {
+    if (!btn) return;
+    if (sim) { btn.dataset.txt = btn.innerHTML; btn.disabled = true; btn.textContent = texto || 'Aguarde…'; }
+    else { btn.disabled = false; if (btn.dataset.txt) btn.innerHTML = btn.dataset.txt; }
+  }
+
+  // ================================================================ CALENDÁRIO
+  function iniciarCursor() {
+    var salvo = ler('vista');
+    S.vista = salvo === 'mes' || salvo === 'semana' || salvo === 'lista' ? salvo : (window.innerWidth < 700 ? 'lista' : 'mes');
+    S.cursor = S.hoje.slice(0, 8) + '01';
+    if (S.vista === 'semana') S.cursor = inicioSemana(S.hoje);
+  }
+
+  function tituloPeriodo() {
+    var p = partes(S.cursor);
+    if (S.vista === 'semana') {
+      var ini = S.cursor, fim = somaDias(ini, 6), pi = partes(ini), pf = partes(fim);
+      if (pi.m === pf.m) return pi.d + ' a ' + pf.d + ' de ' + MESES[pf.m - 1] + ' de ' + pf.a;
+      if (pi.a === pf.a) return pi.d + ' de ' + MESES[pi.m - 1].slice(0, 3) + ' a ' + pf.d + ' de ' + MESES[pf.m - 1].slice(0, 3) + ' de ' + pf.a;
+      return br(ini) + ' a ' + br(fim);
+    }
+    return cap(MESES[p.m - 1]) + ' de ' + p.a;
+  }
+
+  function periodoAtual() {
+    if (S.vista === 'semana') return { ini: S.cursor, fim: somaDias(S.cursor, 6) };
+    var p = partes(S.cursor);
+    return { ini: iso(p.a, p.m, 1), fim: iso(p.a, p.m, diasNoMes(p.a, p.m)) };
+  }
+
+  function renderCalendario() {
+    if (!S.cursor) iniciarCursor();
+    $$('[data-vista]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-vista') === S.vista)); });
+    var titulo = tituloPeriodo();
+    $('#calTitulo').textContent = titulo;
+    $('#printTitulo').textContent = (CFG.titulo || 'Calendário Paroquial') + ' · ' + titulo;
+    var p = partes(S.cursor);
+    $('#irMes').value = String(p.m);
+    garantirOpcaoAno($('#irAno'), p.a);
+    $('#irAno').value = String(p.a);
+    renderLegenda();
+
+    var per = periodoAtual();
+    var corpo = $('#calCorpo');
+    var anos = [+per.ini.slice(0, 4), +per.fim.slice(0, 4)];
+    var faltam = anos.filter(function (a) { return !S.anos[a]; });
+    if (faltam.length) {
+      corpo.innerHTML = '<div class="carregando">Carregando ' + faltam.join(' e ') + '…</div>';
+      var cursorPedido = S.cursor, vistaPedida = S.vista;
+      Promise.all(faltam.map(garantirAno)).then(function () {
+        if (S.cursor === cursorPedido && S.vista === vistaPedida && S.pagina === 'calendario') renderCalendario();
+      }, function (e) {
+        corpo.innerHTML = '<p class="alerta erro">Não foi possível carregar o calendário: ' + esc(e.message) + '</p>';
+      });
+      return;
+    }
+    if (S.vista === 'mes') corpo.innerHTML = htmlMes(p.a, p.m);
+    else if (S.vista === 'semana') corpo.innerHTML = htmlSemana(S.cursor);
+    else corpo.innerHTML = htmlLista(per.ini, per.fim);
+  }
+
+  function garantirOpcaoAno(sel, a) {
+    var tem = $$('option', sel).some(function (o) { return o.value === String(a); });
+    if (!tem) {
+      var anos = $$('option', sel).map(function (o) { return +o.value; }).concat([a]).sort();
+      sel.innerHTML = anos.map(function (x) { return '<option value="' + x + '">' + x + '</option>'; }).join('');
+    }
+  }
+
+  function renderLegenda() {
+    var per = periodoAtual();
+    var usados = {};
+    eventosEntre(per.ini, per.fim, { semFiltro: true }).forEach(function (e) { (e.locais || []).slice(0, 1).forEach(function (l) { usados[l] = true; }); });
+    var html = Object.keys(usados).sort().map(function (l) {
+      return '<span><i class="sw" style="--c:' + corLocal(l) + '"></i>' + esc(l) + '</span>';
+    }).join('');
+    if (CFG.mostrarPendentes !== false) html += '<span><i class="sw tracejado"></i>Tracejado = aguardando aprovação</span>';
+    html += '<span><i class="sw esp"></i>Feriados e datas especiais</span>';
+    $('#legenda').innerHTML = html;
+  }
+
+  /** "Preparação: " antes do nome, a não ser que o nome já comece com o tipo (ex.: "Ensaio do coral"). */
+  function prefixoTipo(e) {
+    if (!e.tipo || e.tipo === 'Evento') return '';
+    var base = e.tipo.split(' /')[0];
+    return String(e.evento || '').toLowerCase().indexOf(base.toLowerCase()) === 0 ? '' : base + ': ';
+  }
+
+  function htmlEvCurto(e, extra) {
+    var pend = e.status === 'Pendente';
+    var tipo = prefixoTipo(e);
+    return '<button class="ev' + (pend ? ' pend' : '') + (extra ? ' extra' : '') + '" style="--c:' + corEvento(e) + '" data-ev="' + esc(e.id) + '" title="' +
+      esc(horario(e) + ' · ' + tipo + e.evento + ' · ' + (e.locais || []).join(', ') + (pend ? ' · aguardando aprovação' : '')) + '">' +
+      (e.diaInteiro ? '' : '<span class="h">' + esc(e.inicio) + '</span> ') + (tipo ? '<i>' + esc(tipo) + '</i>' : '') + esc(e.evento) + '</button>';
+  }
+
+  function htmlCartao(e) {
+    var pend = e.status === 'Pendente';
+    return '<button class="cartao-ev' + (pend ? ' pend' : '') + '" style="--c:' + corEvento(e) + '" data-ev="' + esc(e.id) + '">' +
+      '<span class="ce-h">' + esc(horario(e)) + '</span>' +
+      '<span class="ce-t">' + esc(e.evento) + '</span>' +
+      '<span class="ce-m">' + esc((e.locais || []).join(', ')) + (e.pastoral ? ' · ' + esc(e.pastoral) : '') + '</span>' +
+      ((e.tipo && e.tipo !== 'Evento') || pend ? '<span class="ce-b">' +
+        (e.tipo && e.tipo !== 'Evento' ? '<span class="badge tipo">' + esc(e.tipo) + '</span>' : '') +
+        (pend ? '<span class="badge pend">Aguardando aprovação</span>' : '') + '</span>' : '') +
+      '</button>';
+  }
+
+  function htmlMes(a, m) {
+    var ini = iso(a, m, 1), fimMes = iso(a, m, diasNoMes(a, m));
+    var dia = inicioSemana(ini);
+    var evs = porDia(eventosEntre(ini, fimMes));
+    var limite = 4;
+    var cab = DIAS_C.map(function (d) { return '<div>' + d + '</div>'; }).join('');
+    var celulas = '';
+    do {
+      for (var i = 0; i < 7; i++) {
+        var fora = dia.slice(0, 7) !== ini.slice(0, 7);
+        var esp = fora ? [] : especiaisDe(dia);
+        var lista = fora ? [] : (evs[dia] || []);
+        var cls = 'dia' + (fora ? ' fora' : '') + (dia === S.hoje ? ' hoje' : '') + (dia < S.hoje ? ' passado' : '') + (esp.length ? ' tem-esp' : '');
+        celulas += '<div class="' + cls + '"' + (fora ? '' : ' data-dia="' + dia + '"') + ' aria-label="' + esc(brLongo(dia)) + '">' +
+          '<div class="dia-top"><span class="dia-n">' + partes(dia).d + '</span>' +
+          (esp.length ? '<span class="dia-esp" title="' + esc(esp.map(function (x) { return x.nome; }).join(' · ')) + '">' + esc(esp.map(function (x) { return x.nome; }).join(' · ')) + '</span>' : '') +
+          '</div>' +
+          lista.map(function (e, j) { return htmlEvCurto(e, j >= limite); }).join('') +
+          (lista.length > limite ? '<button class="mais" data-dia="' + dia + '">+' + (lista.length - limite) + ' mais</button>' : '') +
+          (lista.length ? '<div class="ev-pontos">' + lista.slice(0, 6).map(function (e) { return '<i class="ponto' + (e.status === 'Pendente' ? ' pend' : '') + '" style="--c:' + corEvento(e) + '"></i>'; }).join('') + '</div>' : '') +
+          '</div>';
+        dia = somaDias(dia, 1);
+      }
+    } while (dia <= fimMes);
+    return '<div class="mes"><div class="mes-cab">' + cab + '</div><div class="mes-grade">' + celulas + '</div></div>';
+  }
+
+  function htmlSemana(ini) {
+    var fim = somaDias(ini, 6);
+    var evs = porDia(eventosEntre(ini, fim));
+    var html = '';
+    for (var i = 0; i < 7; i++) {
+      var d = somaDias(ini, i), lista = evs[d] || [], esp = especiaisDe(d);
+      html += '<div class="sem-dia' + (d === S.hoje ? ' hoje' : '') + '" data-dia="' + d + '">' +
+        '<div class="sem-cab"><b>' + DIAS_C[i] + '</b><span class="n">' + pad(partes(d).d) + '/' + pad(partes(d).m) + '</span></div>' +
+        esp.map(function (x) { return '<div class="esp-linha">' + esc(x.nome) + '</div>'; }).join('') +
+        (lista.length ? lista.map(htmlCartao).join('') : '<div class="sem-vazio">Nada reservado</div>') +
+        '</div>';
+    }
+    return '<div class="semana">' + html + '</div>';
+  }
+
+  function htmlLista(ini, fim) {
+    var evs = porDia(eventosEntre(ini, fim));
+    var html = '';
+    for (var d = ini; d <= fim; d = somaDias(d, 1)) {
+      var lista = evs[d] || [], esp = especiaisDe(d);
+      if (!lista.length && !esp.length) continue;
+      html += '<div class="lista-dia' + (d === S.hoje ? ' hoje' : '') + '">' +
+        '<div class="lista-data"><span class="n">' + pad(partes(d).d) + '</span><span class="s">' + DIAS_C[diaSem(d)] + '</span></div>' +
+        '<div class="lista-evs">' + esp.map(function (x) { return '<div class="esp-linha">' + esc(x.nome) + '</div>'; }).join('') +
+        (lista.length ? '<div class="cartoes">' + lista.map(htmlCartao).join('') + '</div>' : '') + '</div></div>';
+    }
+    if (!html) {
+      html = '<div class="vazio">Nenhuma reserva ' + (S.fLocal || S.fPastoral ? 'com esses filtros ' : '') + 'neste período.' +
+        '<br><br><button class="btn primario" data-ir="reservar">Reservar um espaço</button></div>';
+    }
+    return '<div class="lista">' + html + '</div>';
+  }
+
+  function mover(n) {
+    if (S.vista === 'semana') S.cursor = somaDias(S.cursor, 7 * n);
+    else {
+      var p = partes(S.cursor), m = p.m + n, a = p.a;
+      while (m < 1) { m += 12; a--; }
+      while (m > 12) { m -= 12; a++; }
+      S.cursor = iso(a, m, 1);
+    }
+    renderCalendario();
+  }
+
+  function mudarVista(v) {
+    var ref = S.vista === 'semana' ? S.cursor : (S.cursor.slice(0, 7) === S.hoje.slice(0, 7) ? S.hoje : S.cursor);
+    S.vista = v;
+    guardar('vista', v);
+    S.cursor = v === 'semana' ? inicioSemana(ref) : ref.slice(0, 8) + '01';
+    renderCalendario();
+  }
+
+  function abrirDia(d) {
+    var lista = eventosEntre(d, d), esp = especiaisDe(d);
+    var corpo = (esp.length ? esp.map(function (x) { return '<div class="esp-linha">' + esc(x.nome) + '</div>'; }).join('') : '') +
+      (lista.length ? '<div style="display:grid;gap:8px">' + lista.map(htmlCartao).join('') + '</div>' : '<p class="meta">Nenhuma reserva neste dia' + (S.fLocal || S.fPastoral ? ' (com os filtros escolhidos)' : '') + '.</p>');
+    var botoes = [];
+    if (d >= S.hoje || S.modoSec) {
+      botoes.push({ texto: 'Reservar um espaço neste dia', classe: 'primario', acao: function () { fecharJanela(); prepararForm(d); irPara('reservar'); } });
+    }
+    abrirJanela(cap(brLongo(d)), corpo, botoes);
+  }
+
+  function abrirEvento(id) {
+    var e = acharEvento(id);
+    if (!e) return;
+    var irmas = [];
+    if (e.pedido) {
+      Object.keys(S.anos).forEach(function (a) {
+        (S.anos[a] || []).forEach(function (x) { if (x.pedido === e.pedido && x.id !== e.id) irmas.push(x); });
+      });
+      irmas.sort(ordenar);
+    }
+    var corpo = '<p class="meta" style="font-size:17px;color:var(--ink)"><b>' + esc(cap(brLongo(e.data))) + '</b><br>' + esc(horario(e)) + '</p>' +
+      '<dl class="pares">' +
+      '<dt>Local</dt><dd>' + esc((e.locais || []).join(', ')) + '</dd>' +
+      '<dt>Pastoral</dt><dd>' + esc(e.pastoral || '—') + '</dd>' +
+      (e.responsavel ? '<dt>Responsável</dt><dd>' + esc(e.responsavel) + '</dd>' : '') +
+      '<dt>Tipo</dt><dd>' + esc(e.tipo || 'Evento') + '</dd>' +
+      '<dt>Situação</dt><dd><span class="badge ' + ST_CLASSE[e.status] + '">' + esc(ST_ROTULO[e.status] || e.status) + '</span></dd>' +
+      (e.pedido ? '<dt>Pedido</dt><dd class="num">nº ' + e.pedido + '</dd>' : '') +
+      '</dl>' +
+      (irmas.length ? '<div><h4 style="margin-bottom:6px">Outras datas deste pedido</h4><div class="lista-datas">' +
+        irmas.slice(0, 24).map(function (x) { return '<span class="dchip' + (x.tipo !== 'Evento' ? ' prep' : '') + '" style="padding-right:10px">' + esc(brCurto(x.data)) + (x.tipo !== 'Evento' ? ' · ' + esc(x.tipo.split(' /')[0].toLowerCase()) : '') + '</span>'; }).join('') +
+        (irmas.length > 24 ? '<span class="dchip" style="padding-right:10px">+' + (irmas.length - 24) + ' datas</span>' : '') + '</div></div>' : '') +
+      (S.admin.senha ? '' : '<p class="dica">Fez este pedido e quer cancelar? Use “Meu pedido” com o número do pedido e o seu telefone.</p>');
+    var botoes = [];
+    if (S.admin.senha) {
+      botoes.push({ texto: 'Editar', classe: '', acao: function () { abrirEdicaoPorId(e.id, e.data); } });
+    }
+    abrirJanela(e.evento, corpo, botoes);
+  }
+
+  // ================================================================ FORMULÁRIO
+  var F = { removidas: {}, avulsas: [], extras: [], conflitos: null, seq: 0, timer: null, enviando: false };
+
+  function montarForm() {
+    var sel = $('#rPastoral');
+    sel.innerHTML = '<option value="">Escolha…</option>' + (CFG.pastorais || []).map(function (p) {
+      return '<option>' + esc(p) + '</option>';
+    }).join('') + '<option value="__outra">Outra (escrever o nome)</option>';
+    $('#rLocais').innerHTML = (CFG.locais || []).map(function (l, i) {
+      return '<label class="chip-op" style="--c:' + corLocal(l.nome) + '"><input type="checkbox" value="' + esc(l.nome) + '" id="loc' + i + '"><span>' + esc(l.nome) + '</span></label>';
+    }).join('') || '<p class="dica">Nenhum local cadastrado. A secretaria precisa preencher a aba “Locais” da planilha.</p>';
+    $('#xTipo').innerHTML = (CFG.tipos || []).filter(function (t) { return t !== 'Evento'; }).map(function (t) { return '<option>' + esc(t) + '</option>'; }).join('');
+    if (CFG.aviso) { $('#avisoForm').textContent = CFG.aviso; $('#avisoForm').hidden = false; }
+    aplicarMinimos();
+    montarRepeticao();
+  }
+
+  function aplicarMinimos() {
+    ['#rData', '#rAte', '#rAvulsa', '#xData'].forEach(function (s) {
+      if (S.modoSec) $(s).removeAttribute('min'); else $(s).setAttribute('min', S.hoje);
+    });
+    $('#notaSecretaria').hidden = !S.modoSec;
+    $('#btnEnviar').textContent = S.modoSec ? 'Lançar reserva confirmada' : 'Enviar pedido';
+  }
+
+  function montarRepeticao() {
+    var base = $('#rData').value, sel = $('#rRep'), atual = sel.value || 'nao';
+    var ops = [['nao', 'Não, é só nessa data']];
+    if (valido(base)) {
+      var p = partes(base), wd = diaSem(base), nome = DIAS_NOME[wd], n = Math.ceil(p.d / 7);
+      var fem = !(wd === 0 || wd === 6);
+      var ultimo = p.d + 7 > diasNoMes(p.a, p.m);
+      ops.push(['semanal', 'Toda semana (' + (fem ? 'toda ' : 'todo ') + nome + ')']);
+      ops.push(['quinzenal', 'A cada 15 dias (' + nome + ' sim, ' + nome + ' não)']);
+      if (n <= 4) ops.push(['mensal-n', 'Todo mês, ' + (fem ? 'na ' + n + 'ª ' : 'no ' + n + 'º ') + nome + ' do mês']);
+      if (ultimo) ops.push(['mensal-ult', 'Todo mês, ' + (fem ? 'na última ' : 'no último ') + nome + ' do mês']);
+      ops.push(['mensal-dia', 'Todo mês, no dia ' + p.d]);
+    } else {
+      ops.push(['semanal', 'Toda semana'], ['quinzenal', 'A cada 15 dias'], ['mensal-n', 'Todo mês (mesmo dia da semana)'], ['mensal-dia', 'Todo mês (mesmo dia do mês)']);
+    }
+    sel.innerHTML = ops.map(function (o) {
+      return '<option value="' + o[0] + '">' + esc(o[1]) + '</option>';
+    }).join('');
+    sel.value = ops.some(function (o) { return o[0] === atual; }) ? atual : (atual === 'mensal-n' && ops.some(function (o) { return o[0] === 'mensal-ult'; }) ? 'mensal-ult' : 'nao');
+  }
+
+  function nthDiaSemana(a, m, wd, n) {
+    var off = (wd - diaSem(iso(a, m, 1)) + 7) % 7, d = 1 + off + 7 * (n - 1);
+    return d <= diasNoMes(a, m) ? iso(a, m, d) : null;
+  }
+  function ultimoDiaSemana(a, m, wd) {
+    var u = diasNoMes(a, m), wu = diaSem(iso(a, m, u));
+    return iso(a, m, u - ((wu - wd + 7) % 7));
+  }
+  function gerarRecorrencia(base, regra, ate) {
+    if (!valido(base)) return [];
+    if (regra === 'nao' || !valido(ate) || ate <= base) return [base];
+    var out = [], MAX = 200, d;
+    if (regra === 'semanal' || regra === 'quinzenal') {
+      for (d = base; d <= ate && out.length < MAX; d = somaDias(d, regra === 'semanal' ? 7 : 14)) out.push(d);
+      return out;
+    }
+    var p = partes(base), wd = diaSem(base), n = Math.ceil(p.d / 7);
+    for (var k = 0; k < 240 && out.length < MAX; k++) {
+      var mm = p.m + k, a = p.a + Math.floor((mm - 1) / 12), m = ((mm - 1) % 12) + 1;
+      if (iso(a, m, 1) > ate) break;
+      if (regra === 'mensal-dia') d = p.d <= diasNoMes(a, m) ? iso(a, m, p.d) : null;
+      else if (regra === 'mensal-n') d = nthDiaSemana(a, m, wd, n);
+      else d = ultimoDiaSemana(a, m, wd);
+      if (d && d >= base && d <= ate) out.push(d);
+    }
+    return out;
+  }
+
+  function horarioPrincipal() {
+    var dia = $('#rDiaInteiro').checked;
+    return { diaInteiro: dia, inicio: dia ? '' : $('#rIni').value, fim: dia ? '' : $('#rFim').value };
+  }
+  function horarioVespera() {
+    var dia = $('#vDiaInteiro').checked;
+    return { diaInteiro: dia, inicio: dia ? '' : $('#vIni').value, fim: dia ? '' : $('#vFim').value };
+  }
+
+  function datasGeradas() {
+    return gerarRecorrencia($('#rData').value, $('#rRep').value, $('#rAte').value);
+  }
+  function datasPrincipais() {
+    var set = {};
+    datasGeradas().forEach(function (d) { if (!F.removidas[d]) set[d] = true; });
+    F.avulsas.forEach(function (d) { set[d] = true; });
+    return Object.keys(set).sort();
+  }
+  function todasDatas() {
+    var hp = horarioPrincipal(), out = [];
+    var princ = datasPrincipais();
+    var mapa = {};
+    princ.forEach(function (d) { mapa[d] = true; out.push({ data: d, tipo: 'Evento', diaInteiro: hp.diaInteiro, inicio: hp.inicio, fim: hp.fim, origem: 'principal' }); });
+    if ($('#rVespera').checked) {
+      var hv = horarioVespera();
+      princ.forEach(function (d) {
+        var v = somaDias(d, -1);
+        if (mapa[v]) return;
+        out.push({ data: v, tipo: 'Preparação / montagem', diaInteiro: hv.diaInteiro, inicio: hv.inicio, fim: hv.fim, origem: 'vespera' });
+      });
+    }
+    F.extras.forEach(function (x, i) { out.push(Object.assign({ origem: 'extra', idx: i }, x)); });
+    out.sort(function (a, b) {
+      var ka = a.data + (a.diaInteiro ? '00:00' : a.inicio), kb = b.data + (b.diaInteiro ? '00:00' : b.inicio);
+      return ka < kb ? -1 : ka > kb ? 1 : 0;
+    });
+    return out;
+  }
+
+  function textoRepeticao() {
+    var regra = $('#rRep').value, base = $('#rData').value, ate = $('#rAte').value;
+    var t = 'Não se repete';
+    if (regra !== 'nao' && valido(base)) {
+      var op = $('#rRep').selectedOptions[0];
+      t = (op ? op.textContent : regra) + (valido(ate) ? ' até ' + br(ate) : '');
+    }
+    var rem = Object.keys(F.removidas).filter(function (d) { return datasGeradas().indexOf(d) >= 0; }).length;
+    if (rem) t += ' (menos ' + rem + ' data' + (rem > 1 ? 's' : '') + ')';
+    if (F.avulsas.length) t += ' + ' + F.avulsas.length + ' data' + (F.avulsas.length > 1 ? 's' : '') + ' avulsa' + (F.avulsas.length > 1 ? 's' : '');
+    if ($('#rVespera').checked) t += ' · com dia anterior para preparação';
+    return t;
+  }
+
+  function pastoralEscolhida() {
+    var v = $('#rPastoral').value;
+    return v === '__outra' ? $('#rPastoralOutra').value.trim() : v;
+  }
+  function locaisEscolhidos() { return $$('#rLocais input:checked').map(function (i) { return i.value; }); }
+
+  function atualizarForm() {
+    var base = $('#rData').value;
+    $('#campoAte').hidden = $('#rRep').value === 'nao';
+    if (!$('#campoAte').hidden && !$('#rAte').value && valido(base)) $('#rAte').value = base.slice(0, 4) + '-12-31';
+    $('.hs', $('[data-campo="horario"]')).hidden = $('#rDiaInteiro').checked;
+    $('#vesperaHorario').hidden = !$('#rVespera').checked;
+    $('#vHoras').hidden = $('#vDiaInteiro').checked;
+    $('#xHoras').hidden = $('#xDiaInteiro').checked;
+    $('#rPastoralOutra').hidden = $('#rPastoral').value !== '__outra';
+
+    // datas principais (chips)
+    var ger = datasGeradas();
+    var princ = datasPrincipais();
+    $('#listaPrincipais').innerHTML = princ.length > 1 || F.avulsas.length ? princ.map(function (d) {
+      return '<span class="dchip">' + esc(brCurto(d)) + (d.slice(0, 4) !== (base || d).slice(0, 4) ? '/' + d.slice(2, 4) : '') +
+        '<button type="button" data-remover="' + d + '" aria-label="Tirar ' + esc(brLongo(d)) + '">' + ICO_X + '</button></span>';
+    }).join('') : '';
+    var cont = '';
+    if (princ.length > 1) cont = princ.length + ' datas do evento. Toque no × para tirar alguma (ex.: feriado ou dia em que não vai ter).';
+    else if (ger.length && $('#rRep').value !== 'nao') cont = 'Escolha até quando o evento se repete.';
+    $('#contPrincipais').textContent = cont;
+    $('#contPrincipais').hidden = !cont;
+
+    if ($('#rVespera').checked && princ.length) {
+      var n = todasDatas().filter(function (d) { return d.origem === 'vespera'; }).length;
+      $('#vesperaInfo').textContent = n === 1 ? 'Vai reservar ' + brMedio(somaDias(princ[0], -1)) + '.' : 'Vai reservar ' + n + ' dias de preparação (o dia anterior de cada data).';
+    } else {
+      $('#vesperaInfo').textContent = 'Ex.: evento no domingo → reserva o sábado.';
+    }
+
+    $('#listaExtras').innerHTML = F.extras.map(function (x, i) {
+      return '<span class="dchip prep">' + esc(brCurto(x.data)) + ' · ' + esc(x.tipo.split(' /')[0].toLowerCase()) + ' · ' + esc(horario(x)) +
+        '<button type="button" data-remover-extra="' + i + '" aria-label="Tirar">' + ICO_X + '</button></span>';
+    }).join('');
+
+    renderResumo();
+    agendarConflitos();
+  }
+
+  function renderResumo() {
+    var datas = todasDatas();
+    var loc = locaisEscolhidos();
+    var past = pastoralEscolhida();
+    var evento = $('#rEvento').value.trim();
+    var html = '<dl>' +
+      '<dt>Evento</dt><dd>' + (evento ? esc(evento) : '<span class="opc">—</span>') + '</dd>' +
+      '<dt>Pastoral</dt><dd>' + (past ? esc(past) : '<span class="opc">—</span>') + '</dd>' +
+      '<dt>Local</dt><dd>' + (loc.length ? esc(loc.join(', ')) : '<span class="opc">—</span>') + '</dd>' +
+      '<dt>Datas</dt><dd class="num">' + (datas.length ? datas.length + (datas.length === 1 ? ' data' : ' datas') : '<span class="opc">—</span>') + '</dd>' +
+      '</dl>';
+    if (datas.length) {
+      var conf = F.conflitos && F.conflitos.chave === chaveConflito(datas, loc) ? F.conflitos.lista : null;
+      html += '<ul class="res-datas">' + datas.map(function (d, i) {
+        var c = conf ? conf[i] || [] : [];
+        return '<li class="' + (c.length ? 'conflito' : '') + '"><span class="rd-l"><span>' + esc(brMedio(d.data)) + '</span><span>' + esc(horario(d)) + '</span></span>' +
+          (d.tipo !== 'Evento' ? '<span class="opc">' + esc(d.tipo) + '</span>' : '') +
+          c.map(function (x) {
+            return '<span class="rd-c">Já reservado: ' + esc(x.evento) + ' (' + esc(x.locais.join(', ')) + ', ' + esc(horario(x)) + ')' + (x.status === 'Pendente' ? ', aguardando aprovação' : '') + '</span>';
+          }).join('') + '</li>';
+      }).join('') + '</ul>';
+    }
+    $('#resumoCorpo').innerHTML = html;
+    var modo = S.modoSec ? 'sec' : CFG.modo;
+    $('#dicaEnvio').textContent = modo === 'sec' ? 'A reserva entra como confirmada.' :
+      modo === 'Automática' ? 'A reserva entra direto no calendário.' :
+      modo === 'Automática sem conflito' ? 'Se o local estiver livre, a reserva já entra confirmada. Se houver conflito, a secretaria vai analisar.' :
+      'Depois de enviar, a secretaria confere e aprova o pedido.';
+  }
+
+  function chaveConflito(datas, loc) {
+    return loc.join('|') + '#' + datas.map(function (d) { return d.data + d.inicio + d.fim + (d.diaInteiro ? 'D' : ''); }).join(',');
+  }
+
+  function agendarConflitos() {
+    clearTimeout(F.timer);
+    var datas = todasDatas().filter(function (d) { return valido(d.data); });
+    var loc = locaisEscolhidos();
+    var dispo = $('#dispo');
+    if (!datas.length || !loc.length) { dispo.hidden = true; return; }
+    var chave = chaveConflito(todasDatas(), loc);
+    if (F.conflitos && F.conflitos.chave === chave) { mostrarDispo(); return; }
+    dispo.hidden = false;
+    dispo.className = 'dispo info';
+    dispo.textContent = 'Conferindo se os locais estão livres…';
+    F.timer = setTimeout(function () {
+      var seq = ++F.seq;
+      var todas = todasDatas();
+      api('verificarConflitos', {
+        locais: loc,
+        datas: todas.map(function (d) { return { data: d.data, diaInteiro: d.diaInteiro, inicio: d.inicio, fim: d.fim }; })
+      }).then(function (lista) {
+        if (seq !== F.seq) return;
+        F.conflitos = { chave: chave, lista: lista };
+        renderResumo();
+        mostrarDispo();
+      }, function () {
+        if (seq !== F.seq) return;
+        dispo.className = 'dispo info';
+        dispo.textContent = 'Não foi possível conferir agora. A secretaria vai conferir ao receber.';
+      });
+    }, 650);
+  }
+  function mostrarDispo() {
+    var dispo = $('#dispo');
+    if (!F.conflitos) return;
+    var n = F.conflitos.lista.filter(function (c) { return c.length; }).length;
+    dispo.hidden = false;
+    if (n) {
+      dispo.className = 'dispo warn';
+      dispo.textContent = (n === 1 ? '1 data já tem' : n + ' datas já têm') + ' reserva no mesmo local e horário (veja acima). Você pode enviar mesmo assim: a secretaria vai decidir.';
+    } else {
+      dispo.className = 'dispo ok';
+      dispo.textContent = 'Os locais escolhidos estão livres em todas as datas.';
+    }
+  }
+
+  function limparErros() {
+    $$('#formReserva .campo.invalido').forEach(function (c) { c.classList.remove('invalido'); });
+    $$('#formReserva .erro-msg').forEach(function (e) { e.remove(); });
+    $('#erroEnvio').hidden = true;
+  }
+  function marcarErro(campo, msg) {
+    var c = $('#formReserva [data-campo="' + campo + '"]');
+    if (!c) return;
+    c.classList.add('invalido');
+    var p = document.createElement('p');
+    p.className = 'erro-msg';
+    p.textContent = msg;
+    c.appendChild(p);
+  }
+
+  function validarForm() {
+    limparErros();
+    var erros = [];
+    function e(campo, msg) { erros.push(campo); marcarErro(campo, msg); }
+    if (!pastoralEscolhida()) e('pastoral', 'Escolha a pastoral ou movimento.');
+    if (!$('#rResp').value.trim()) e('responsavel', 'Informe o nome do responsável.');
+    if (!S.modoSec && $('#rTel').value.replace(/\D/g, '').length < 10) e('telefone', 'Informe o telefone com DDD.');
+    var em = $('#rEmail').value.trim();
+    if (em && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) e('email', 'O e-mail parece incompleto. Confira ou deixe em branco.');
+    if (!$('#rEvento').value.trim()) e('evento', 'Informe o nome do evento.');
+    if (!locaisEscolhidos().length) e('locais', 'Marque pelo menos um local.');
+    var base = $('#rData').value;
+    if (!valido(base) && !F.avulsas.length) e('data', 'Escolha a data do evento.');
+    else if (valido(base) && base < S.hoje && !S.modoSec) e('data', 'Essa data já passou.');
+    var hp = horarioPrincipal();
+    if (!hp.diaInteiro) {
+      if (!hp.inicio || !hp.fim) e('horario', 'Informe o horário de início e de término, ou marque “Dia inteiro”.');
+      else if (minutos(hp.fim) <= minutos(hp.inicio)) e('horario', 'O término precisa ser depois do início.');
+    }
+    var hv = horarioVespera();
+    if ($('#rVespera').checked && !hv.diaInteiro && (!hv.inicio || !hv.fim || minutos(hv.fim) <= minutos(hv.inicio))) {
+      erros.push('vespera');
+      toast('Confira o horário da preparação no dia anterior.', true);
+    }
+    if (erros.length) {
+      var primeiro = $('#formReserva .campo.invalido');
+      if (primeiro) {
+        primeiro.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        var foco = $('input, select', primeiro);
+        if (foco) setTimeout(function () { foco.focus({ preventScroll: true }); }, 300);
+      }
+      $('#erroEnvio').textContent = 'Faltam algumas informações. Confira os campos marcados em vermelho.';
+      $('#erroEnvio').hidden = false;
+    }
+    return !erros.length;
+  }
+
+  function enviarForm(ev) {
+    ev.preventDefault();
+    if (F.enviando || !validarForm()) return;
+    var datas = todasDatas();
+    if (!datas.length) { toast('Escolha pelo menos uma data.', true); return; }
+    var dados = {
+      pastoral: pastoralEscolhida(),
+      responsavel: $('#rResp').value.trim(),
+      telefone: $('#rTel').value.trim(),
+      email: $('#rEmail').value.trim(),
+      evento: $('#rEvento').value.trim(),
+      locais: locaisEscolhidos(),
+      obs: $('#rObs').value.trim(),
+      repeticao: textoRepeticao(),
+      datas: datas.map(function (d) { return { data: d.data, tipo: d.tipo, diaInteiro: d.diaInteiro, inicio: d.inicio, fim: d.fim }; })
+    };
+    var btn = $('#btnEnviar');
+    F.enviando = true;
+    ocupado(btn, true, 'Enviando…');
+    api('enviarPedido', dados, S.modoSec ? S.admin.senha : null).then(function (r) {
+      F.enviando = false;
+      ocupado(btn, false);
+      guardar('ultimoTel', dados.telefone);
+      mostrarSucesso(r, dados);
+      Object.keys(S.anos).forEach(function (a) { delete S.anos[a]; });
+      if (S.admin.senha) S.admin.linhas = null;
+    }, function (e) {
+      F.enviando = false;
+      ocupado(btn, false);
+      $('#erroEnvio').textContent = e.message;
+      $('#erroEnvio').hidden = false;
+    });
+  }
+
+  function mostrarSucesso(r, dados) {
+    var eraSec = S.modoSec;
+    var tudoConf = r.pendentes === 0;
+    var html = '<div class="sucesso">' +
+      '<div class="selo">' + ICO_OK + '</div>' +
+      '<h2 style="font-size:28px">' + (eraSec ? 'Reserva lançada' : tudoConf ? 'Reserva confirmada' : 'Pedido enviado') + '</h2>' +
+      '<div class="numero-pedido"><span>Pedido nº</span><b>' + r.pedido + '</b></div>' +
+      '<p style="margin:0">' + (tudoConf
+        ? 'As ' + r.total + ' data(s) já estão confirmadas no calendário.'
+        : (r.confirmadas ? r.confirmadas + ' data(s) já confirmada(s). ' : '') + r.pendentes + ' data(s) aguardando a aprovação da secretaria.') + '</p>' +
+      (eraSec ? '' : '<p style="margin:0"><b>Guarde o número do pedido.</b> Para ver se foi aprovado ou para cancelar, vá em “Meu pedido” e informe o número <b>' + r.pedido + '</b> e o seu telefone.' +
+        (dados.email ? ' Também enviamos um e-mail para ' + esc(dados.email) + '.' : '') + '</p>') +
+      '<table class="datas-tab"><thead><tr><th>Data</th><th>Horário</th><th>Tipo</th><th>Situação</th></tr></thead><tbody>' +
+      r.datas.map(function (d) {
+        return '<tr><td class="num">' + esc(brMedio(d.data)) + '</td><td class="num">' + esc(horario(d)) + '</td><td>' + esc(d.tipo) + '</td><td><span class="badge ' + ST_CLASSE[d.status] + '">' + esc(ST_ROTULO[d.status]) + '</span>' +
+          (d.conflitos && d.conflitos.length ? '<br><span class="dica" style="color:var(--warn)">Conflito com: ' + esc(d.conflitos.map(function (c) { return c.evento; }).join(', ')) + '</span>' : '') + '</td></tr>';
+      }).join('') + '</tbody></table>' +
+      '<div class="acoes">' +
+      '<button class="btn primario" data-acao="ver-no-calendario" data-data="' + r.datas[0].data + '">Ver no calendário</button>' +
+      '<button class="btn" data-acao="novo-pedido">Fazer outro pedido</button>' +
+      (eraSec ? '<button class="btn ghost" data-ir="secretaria">Voltar para a secretaria</button>' : '') +
+      '</div></div>';
+    $('#sucessoArea').innerHTML = html;
+    $('#sucessoArea').hidden = false;
+    $('#formArea').hidden = true;
+    window.scrollTo(0, 0);
+  }
+
+  function limparForm(manterContato) {
+    var form = $('#formReserva');
+    var guard = manterContato ? { p: $('#rPastoral').value, po: $('#rPastoralOutra').value, r: $('#rResp').value, t: $('#rTel').value, e: $('#rEmail').value } : null;
+    form.reset();
+    if (guard) { $('#rPastoral').value = guard.p; $('#rPastoralOutra').value = guard.po; $('#rResp').value = guard.r; $('#rTel').value = guard.t; $('#rEmail').value = guard.e; }
+    F.removidas = {}; F.avulsas = []; F.extras = []; F.conflitos = null;
+    $('#rAte').value = '';
+    montarRepeticao();
+    limparErros();
+    $('#sucessoArea').hidden = true;
+    $('#formArea').hidden = false;
+    atualizarForm();
+  }
+
+  function prepararForm(data) {
+    if (!$('#sucessoArea').hidden) limparForm(true);
+    if (data) {
+      $('#rData').value = data;
+      F.removidas = {};
+      montarRepeticao();
+    }
+  }
+
+  // ================================================================ MEU PEDIDO
+  var consultaAtual = null;
+  function consultar(ev) {
+    if (ev) ev.preventDefault();
+    var num = $('#cNum').value.trim(), tel = $('#cTel').value.trim();
+    if (!num || tel.replace(/\D/g, '').length < 8) {
+      $('#consultaRes').innerHTML = '<p class="alerta erro">Informe o número do pedido e o telefone com DDD.</p>';
+      return;
+    }
+    var btn = $('#btnConsultar');
+    ocupado(btn, true, 'Consultando…');
+    api('consultarPedido', num, tel).then(function (r) {
+      ocupado(btn, false);
+      consultaAtual = { num: num, tel: tel };
+      renderConsulta(r);
+    }, function (e) {
+      ocupado(btn, false);
+      $('#consultaRes').innerHTML = '<p class="alerta erro">' + esc(e.message) + '</p>';
+    });
+  }
+
+  function renderConsulta(r) {
+    var ativas = r.datas.filter(function (d) { return d.status === 'Pendente' || d.status === 'Confirmado'; });
+    var html = '<div class="painel">' +
+      '<div><span class="pc-num">Pedido nº ' + r.pedido + '</span><h3>' + esc(r.evento) + '</h3>' +
+      '<p class="meta">' + esc(r.pastoral) + ' · ' + esc(r.locais.join(', ')) + ' · ' + esc(r.responsavel) + '</p></div>' +
+      '<table class="datas-tab"><thead><tr>' + (ativas.length ? '<th style="width:36px"><span hidden>Marcar</span></th>' : '') + '<th>Data</th><th>Horário</th><th>Situação</th></tr></thead><tbody>' +
+      r.datas.map(function (d) {
+        var ativa = d.status === 'Pendente' || d.status === 'Confirmado';
+        return '<tr>' + (ativas.length ? '<td>' + (ativa ? '<input type="checkbox" class="cCanc" value="' + esc(d.id) + '" aria-label="Marcar ' + esc(brLongo(d.data)) + '" style="width:20px;height:20px">' : '') + '</td>' : '') +
+          '<td class="num"><b>' + esc(brMedio(d.data)) + '</b>' + (d.tipo !== 'Evento' ? '<br><span class="dica">' + esc(d.tipo) + '</span>' : '') + '</td>' +
+          '<td class="num">' + esc(horario(d)) + '</td>' +
+          '<td><span class="badge ' + ST_CLASSE[d.status] + '">' + esc(ST_ROTULO[d.status]) + '</span>' +
+          (d.obsSecretaria ? '<br><span class="dica">' + esc(d.obsSecretaria) + '</span>' : '') + '</td></tr>';
+      }).join('') + '</tbody></table>' +
+      (ativas.length ? '<div class="acoes"><button class="btn perigo" data-acao="cancelar-marcadas">Cancelar datas marcadas</button>' +
+        '<button class="btn ghost" data-acao="marcar-todas">Marcar todas</button></div>' : '') +
+      '<p class="dica">Precisa mudar uma data ou horário? Cancele a data aqui e faça um novo pedido' + (r.contato ? ', ou fale com a secretaria: ' + esc(r.contato) : ', ou fale com a secretaria') + '.</p>' +
+      '</div>';
+    $('#consultaRes').innerHTML = html;
+  }
+
+  function cancelarMarcadas() {
+    var ids = $$('.cCanc:checked').map(function (i) { return i.value; });
+    if (!ids.length) { toast('Marque as datas que quer cancelar.', true); return; }
+    confirmar('Cancelar ' + (ids.length === 1 ? '1 data' : ids.length + ' datas') + '?',
+      '<p style="margin:0">As datas marcadas serão liberadas no calendário para outras pastorais. Não dá para desfazer pelo site.</p>', 'Sim, cancelar', 'perigo')
+      .then(function (sim) {
+        if (!sim) return;
+        api('cancelarPedido', consultaAtual.num, consultaAtual.tel, ids).then(function (r) {
+          toast('Cancelamento registrado.');
+          renderConsulta(r);
+          Object.keys(S.anos).forEach(function (a) { delete S.anos[a]; });
+        }, function (e) { toast(e.message, true); });
+      });
+  }
+
+  // ================================================================ SECRETARIA
+  function abrirSecretaria() {
+    if (!S.admin.senha) {
+      $('#secLogin').hidden = false;
+      $('#secPainel').hidden = true;
+      setTimeout(function () { $('#sSenha').focus(); }, 50);
+      return;
+    }
+    $('#secLogin').hidden = true;
+    $('#secPainel').hidden = false;
+    if (!S.admin.linhas) carregarSecretaria(); else renderSecretaria();
+  }
+
+  function entrar(ev) {
+    ev.preventDefault();
+    var senha = $('#sSenha').value;
+    if (!senha) return;
+    var btn = $('#btnEntrar');
+    ocupado(btn, true, 'Entrando…');
+    api('entrarSecretaria', senha).then(function () {
+      ocupado(btn, false);
+      S.admin.senha = senha;
+      guardarSessao('calparoquial.sec', senha);
+      $('#sSenha').value = '';
+      $('#tabSecretaria').hidden = false;
+      S.admin.linhas = null;
+      abrirSecretaria();
+    }, function (e) {
+      ocupado(btn, false);
+      toast(e.message, true);
+    });
+  }
+
+  function sair() {
+    S.admin = { senha: null, linhas: null, ano: null, aba: 'pendentes' };
+    S.modoSec = false;
+    guardarSessao('calparoquial.sec', null);
+    aplicarMinimos();
+    abrirSecretaria();
+  }
+
+  function carregarSecretaria() {
+    if (!S.admin.ano) S.admin.ano = +S.hoje.slice(0, 4);
+    $('#secPendentes').innerHTML = '<div class="carregando">Carregando pedidos…</div>';
+    return api('listarSecretaria', S.admin.senha, S.admin.ano).then(function (r) {
+      S.admin.linhas = r.linhas;
+      renderSecretaria();
+    }, function (e) {
+      if (/senha/i.test(e.message)) { toast('Senha inválida. Entre de novo.', true); sair(); return; }
+      $('#secPendentes').innerHTML = '<p class="alerta erro">' + esc(e.message) + '</p>';
+    });
+  }
+
+  function renderSecretaria() {
+    $$('[data-secaba]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-secaba') === S.admin.aba)); });
+    $('#secPendentes').hidden = S.admin.aba !== 'pendentes';
+    $('#secTodas').hidden = S.admin.aba !== 'todas';
+    var pend = (S.admin.linhas || []).filter(function (l) { return l.status === 'Pendente'; });
+    $('#contPend').textContent = pend.length;
+    $('#contPend').hidden = !pend.length;
+    renderPendentes(pend);
+    renderTodas();
+  }
+
+  function linkWhats(tel) {
+    var d = String(tel || '').replace(/\D/g, '');
+    if (d.length === 10 || d.length === 11) d = '55' + d;
+    return d.length >= 12 ? 'https://wa.me/' + d : '';
+  }
+
+  function renderPendentes(pend) {
+    if (!pend.length) {
+      $('#secPendentes').innerHTML = '<div class="vazio">Nenhum pedido aguardando aprovação.</div>';
+      return;
+    }
+    var grupos = {};
+    pend.forEach(function (l) { var k = l.pedido || l.id; (grupos[k] = grupos[k] || []).push(l); });
+    var lista = Object.keys(grupos).map(function (k) { return grupos[k].sort(ordenar); })
+      .sort(function (a, b) { return a[0].data < b[0].data ? -1 : 1; });
+    $('#secPendentes').innerHTML = lista.map(function (g) {
+      var l0 = g[0], wa = linkWhats(l0.telefone), nConf = g.filter(function (l) { return l.conflitos && l.conflitos.length; }).length;
+      return '<article class="pedido-card" data-grupo="' + esc(l0.pedido || l0.id) + '">' +
+        '<div class="pc-cab"><div><span class="pc-num">Pedido nº ' + (l0.pedido || '—') + ' · enviado em ' + esc(l0.enviado || '—') + '</span>' +
+        '<h3>' + esc(l0.evento) + '</h3><p class="meta">' + esc(l0.pastoral) + ' · ' + esc((l0.locais || []).join(', ')) + '</p>' +
+        (l0.repeticao ? '<p class="meta">' + esc(l0.repeticao) + '</p>' : '') + '</div>' +
+        '<div class="pc-contato"><b>' + esc(l0.responsavel) + '</b><br>' +
+        (wa ? '<a href="' + wa + '" target="_blank" rel="noopener">' + esc(l0.telefone) + ' (WhatsApp)</a>' : esc(l0.telefone || '')) +
+        (l0.email ? '<br>' + esc(l0.email) : '') + '</div></div>' +
+        (l0.obs ? '<p class="pc-obs">' + esc(l0.obs) + '</p>' : '') +
+        (nConf ? '<p class="alerta warn">' + (nConf === 1 ? '1 data tem conflito' : nConf + ' datas têm conflito') + ' com outra reserva no mesmo local.</p>' : '') +
+        '<ul class="pc-datas">' + g.map(function (l) {
+          var c = l.conflitos || [];
+          return '<li class="' + (c.length ? 'conflito' : '') + '"><label class="check"><input type="checkbox" class="pSel" value="' + esc(l.id) + '" checked> ' +
+            '<span><b class="num">' + esc(brMedio(l.data)) + '</b> · <span class="num">' + esc(horario(l)) + '</span>' + (l.tipo !== 'Evento' ? ' · ' + esc(l.tipo) : '') + '</span></label>' +
+            c.map(function (x) {
+              return '<span class="conf">Conflito: ' + esc(x.evento) + ' — ' + esc(x.pastoral) + ' (' + esc(x.locais.join(', ')) + ', ' + esc(horario(x)) + ', ' + esc(ST_ROTULO[x.status].toLowerCase()) + (x.pedido ? ', pedido nº ' + x.pedido : '') + ')</span>';
+            }).join('') + '</li>';
+        }).join('') + '</ul>' +
+        '<div class="acoes"><button class="btn ok" data-acao="aprovar">' + ICO_OK + ' Aprovar marcadas</button>' +
+        '<button class="btn perigo" data-acao="recusar">Recusar marcadas</button></div>' +
+        '</article>';
+    }).join('');
+  }
+
+  function idsMarcados(card) { return $$('.pSel:checked', card).map(function (i) { return i.value; }); }
+
+  function mudarStatus(ids, status, motivo, btn) {
+    ocupado(btn, true, 'Salvando…');
+    return api('alterarStatus', S.admin.senha, ids, status, motivo || '').then(function (r) {
+      ocupado(btn, false);
+      toast(r.alteradas + (r.alteradas === 1 ? ' data atualizada.' : ' datas atualizadas.'));
+      Object.keys(S.anos).forEach(function (a) { delete S.anos[a]; });
+      return carregarSecretaria();
+    }, function (e) { ocupado(btn, false); toast(e.message, true); });
+  }
+
+  function montarFiltrosTodas() {
+    var a0 = +S.hoje.slice(0, 4);
+    $('#tAno').innerHTML = [a0 - 1, a0, a0 + 1, a0 + 2].map(function (a) { return '<option value="' + a + '">' + a + '</option>'; }).join('');
+    $('#tMes').innerHTML = '<option value="">Todos os meses</option>' + MESES.map(function (m, i) { return '<option value="' + pad(i + 1) + '">' + cap(m) + '</option>'; }).join('');
+    $('#tLocal').innerHTML = '<option value="">Todos os locais</option>' + (CFG.locais || []).map(function (l) { return '<option>' + esc(l.nome) + '</option>'; }).join('');
+  }
+
+  function renderTodas() {
+    if (S.admin.aba !== 'todas') return;
+    garantirOpcaoAno($('#tAno'), S.admin.ano);
+    $('#tAno').value = String(S.admin.ano);
+    var mes = $('#tMes').value, st = $('#tStatus').value, loc = $('#tLocal').value, q = $('#tBusca').value.trim().toLowerCase();
+    var linhas = (S.admin.linhas || []).filter(function (l) {
+      if (l.data.slice(0, 4) !== String(S.admin.ano)) return false;
+      if (mes && l.data.slice(5, 7) !== mes) return false;
+      if (st && l.status !== st) return false;
+      if (loc && (l.locais || []).indexOf(loc) < 0) return false;
+      if (q) {
+        var alvo = [l.evento, l.pastoral, l.responsavel, l.pedido, l.telefone].join(' ').toLowerCase();
+        if (alvo.indexOf(q) < 0) return false;
+      }
+      return true;
+    }).sort(ordenar);
+    var html = '<thead><tr><th>Data</th><th>Horário</th><th>Evento</th><th>Local</th><th>Pastoral</th><th>Responsável</th><th>Situação</th><th>Ações</th></tr></thead><tbody>';
+    html += linhas.map(function (l) {
+      var ativa = l.status === 'Pendente' || l.status === 'Confirmado';
+      return '<tr class="' + (ativa ? '' : 'inativa') + '"><td class="num"><b>' + esc(brMedio(l.data)) + '</b></td><td class="num">' + esc(horario(l)) + '</td>' +
+        '<td class="ev-nome">' + esc(l.evento) + (l.tipo !== 'Evento' ? '<br><span class="dica">' + esc(l.tipo) + '</span>' : '') + (l.pedido ? '<br><span class="dica num">nº ' + l.pedido + '</span>' : '') + '</td>' +
+        '<td>' + esc((l.locais || []).join(', ')) + '</td><td>' + esc(l.pastoral) + '</td>' +
+        '<td>' + esc(l.responsavel) + (l.telefone ? '<br><span class="dica num">' + esc(l.telefone) + '</span>' : '') + '</td>' +
+        '<td><span class="badge ' + ST_CLASSE[l.status] + '">' + esc(l.status) + '</span></td>' +
+        '<td><div class="acoes-linha"><button class="btn sm" data-editar="' + esc(l.id) + '">Editar</button>' +
+        (ativa ? '<button class="btn sm ghost" data-cancelar="' + esc(l.id) + '">Cancelar</button>' : '') + '</div></td></tr>';
+    }).join('');
+    if (!linhas.length) html += '<tr><td colspan="8" class="meta" style="padding:24px;text-align:center">Nenhuma reserva encontrada com esses filtros.</td></tr>';
+    $('#tabTodas').innerHTML = html + '</tbody>';
+  }
+
+  function abrirEdicaoPorId(id, data) {
+    if (!S.admin.senha) return;
+    var achar = function () {
+      return (S.admin.linhas || []).filter(function (l) { return l.id === id || (/^L\d+$/.test(id) && l.linha === +id.slice(1)); })[0];
+    };
+    var l = achar();
+    if (l) { abrirEdicao(l); return; }
+    S.admin.ano = +String(data || S.hoje).slice(0, 4);
+    carregarSecretaria().then(function () { var x = achar(); if (x) abrirEdicao(x); else toast('Reserva não encontrada.', true); });
+  }
+
+  function abrirEdicao(l) {
+    var locaisOp = (CFG.locais || []).map(function (x) { return x.nome; });
+    (l.locais || []).forEach(function (x) { if (locaisOp.indexOf(x) < 0) locaisOp.push(x); });
+    var tipos = (CFG.tipos || ['Evento']).slice();
+    if (tipos.indexOf(l.tipo) < 0) tipos.push(l.tipo);
+    var corpo = '<div class="linha2">' +
+      '<div class="campo"><label for="eData">Data</label><input type="date" id="eData" value="' + esc(l.data) + '"></div>' +
+      '<div class="campo"><span class="label">Horário</span><div class="horario"><span class="hs" id="eHoras"' + (l.diaInteiro ? ' hidden' : '') + '><input type="time" id="eIni" value="' + esc(l.inicio || '19:00') + '" aria-label="Início"> às <input type="time" id="eFim" value="' + esc(l.fim || '21:00') + '" aria-label="Término"></span>' +
+      '<label class="check"><input type="checkbox" id="eDia"' + (l.diaInteiro ? ' checked' : '') + '> Dia inteiro</label></div></div></div>' +
+      '<div class="campo"><label for="eEvento">Evento</label><input type="text" id="eEvento" value="' + esc(l.evento) + '"></div>' +
+      '<div class="linha2"><div class="campo"><label for="eTipo">Tipo</label><select id="eTipo">' + tipos.map(function (t) { return '<option' + (t === l.tipo ? ' selected' : '') + '>' + esc(t) + '</option>'; }).join('') + '</select></div>' +
+      '<div class="campo"><label for="eStatus">Situação</label><select id="eStatus">' + ['Pendente', 'Confirmado', 'Recusado', 'Cancelado'].map(function (s) { return '<option' + (s === l.status ? ' selected' : '') + '>' + s + '</option>'; }).join('') + '</select></div></div>' +
+      '<div class="campo"><span class="label">Local</span><div class="chips-check" id="eLocais">' + locaisOp.map(function (x, i) {
+        return '<label class="chip-op" style="--c:' + corLocal(x) + '"><input type="checkbox" id="eLoc' + i + '" value="' + esc(x) + '"' + ((l.locais || []).indexOf(x) >= 0 ? ' checked' : '') + '><span>' + esc(x) + '</span></label>';
+      }).join('') + '</div></div>' +
+      '<div class="linha2"><div class="campo"><label for="ePastoral">Pastoral</label><input type="text" id="ePastoral" value="' + esc(l.pastoral) + '"></div>' +
+      '<div class="campo"><label for="eResp">Responsável</label><input type="text" id="eResp" value="' + esc(l.responsavel) + '"></div></div>' +
+      '<div class="linha2"><div class="campo"><label for="eTel">Telefone</label><input type="tel" id="eTel" value="' + esc(l.telefone) + '"></div>' +
+      '<div class="campo"><label for="eEmail">E-mail</label><input type="email" id="eEmail" value="' + esc(l.email) + '"></div></div>' +
+      '<div class="campo"><label for="eObsSec">Observação da secretaria <span class="opc">(o solicitante vê em “Meu pedido”)</span></label><textarea id="eObsSec" rows="2">' + esc(l.obsSecretaria) + '</textarea></div>' +
+      (l.obs ? '<p class="pc-obs"><b>Observação de quem pediu:</b> ' + esc(l.obs) + '</p>' : '') +
+      '<p class="dica">Esta edição muda só esta data (' + esc(brMedio(l.data)) + ')' + (l.pedido ? ' do pedido nº ' + l.pedido : '') + '.</p>';
+    abrirJanela('Editar reserva', corpo, [
+      { texto: 'Cancelar edição', classe: 'ghost', acao: function () { fecharJanela(); } },
+      {
+        texto: 'Salvar', classe: 'primario', acao: function (btn) {
+          var dia = $('#eDia').checked;
+          var mud = {
+            data: $('#eData').value, diaInteiro: dia, inicio: dia ? '' : $('#eIni').value, fim: dia ? '' : $('#eFim').value,
+            evento: $('#eEvento').value, tipo: $('#eTipo').value, status: $('#eStatus').value,
+            locais: $$('#eLocais input:checked').map(function (i) { return i.value; }),
+            pastoral: $('#ePastoral').value, responsavel: $('#eResp').value, telefone: $('#eTel').value, email: $('#eEmail').value,
+            obsSecretaria: $('#eObsSec').value
+          };
+          ocupado(btn, true, 'Salvando…');
+          api('editarReserva', S.admin.senha, l.id, mud).then(function (r) {
+            ocupado(btn, false);
+            fecharJanela();
+            Object.keys(S.anos).forEach(function (a) { delete S.anos[a]; });
+            carregarSecretaria();
+            if (S.pagina === 'calendario') renderCalendario();
+            if (r.conflitos && r.conflitos.length) {
+              abrirJanela('Salvo, mas há conflito', '<p style="margin:0">Já existe outra reserva no mesmo local e horário:</p><ul>' + r.conflitos.map(function (x) {
+                return '<li><b>' + esc(x.evento) + '</b> — ' + esc(x.pastoral) + ' (' + esc(x.locais.join(', ')) + ', ' + esc(horario(x)) + ')</li>';
+              }).join('') + '</ul>', [{ texto: 'Entendi', classe: 'primario', acao: fecharJanela }]);
+            } else toast('Reserva atualizada.');
+          }, function (e) { ocupado(btn, false); toast(e.message, true); });
+        }
+      }
+    ]);
+    $('#eDia').addEventListener('change', function () { $('#eHoras').hidden = this.checked; });
+  }
+
+  // ================================================================ PLANILHA (Excel)
+  var excelPromessa = null;
+  function carregarExcel() {
+    if (window.ExcelJS) return Promise.resolve(window.ExcelJS);
+    if (!excelPromessa) {
+      excelPromessa = new Promise(function (ok, falha) {
+        var s = document.createElement('script');
+        s.src = EXCELJS_URL;
+        s.onload = function () { ok(window.ExcelJS); };
+        s.onerror = function () { excelPromessa = null; falha(new Error('Não foi possível carregar o gerador de planilhas. Confira a internet e tente de novo.')); };
+        document.head.appendChild(s);
+      });
+    }
+    return excelPromessa;
+  }
+
+  function abrirExportar() {
+    carregarExcel().catch(function () { /* tenta de novo ao gerar */ });
+    var p = partes(S.cursor);
+    var semIni = S.vista === 'semana' ? S.cursor : inicioSemana(S.cursor.slice(0, 7) === S.hoje.slice(0, 7) ? S.hoje : S.cursor);
+    var filtros = [S.fLocal, S.fPastoral].filter(Boolean);
+    var corpo = '<div class="campo"><span class="label">O que você quer baixar?</span><div class="opcoes">' +
+      '<label class="opcao"><input type="radio" name="xPer" value="mes"' + (S.vista !== 'semana' ? ' checked' : '') + '><span><b>O mês de ' + MESES[p.m - 1] + ' de ' + p.a + '</b><small>Uma folha com o mês inteiro, igual ao calendário de parede.</small></span></label>' +
+      '<label class="opcao"><input type="radio" name="xPer" value="semana"' + (S.vista === 'semana' ? ' checked' : '') + '><span><b>Uma semana</b><small>Os 7 dias lado a lado, de domingo a sábado.</small>' +
+      '<input type="date" id="xSemana" value="' + semIni + '" aria-label="Semana que começa em" style="margin-top:6px;max-width:220px"></span></label>' +
+      '<label class="opcao"><input type="radio" name="xPer" value="ano"><span><b>O ano inteiro de ' + p.a + '</b><small>Uma aba para cada mês (12 abas), mais a lista completa.</small></span></label>' +
+      '</div></div>' +
+      '<div class="campo"><span class="label">Formato</span><div class="opcoes">' +
+      '<label class="opcao"><input type="radio" name="xFmt" value="ambos" checked><span><b>Calendário + lista</b><small>Duas abas: a grade do calendário e uma tabela com todos os eventos.</small></span></label>' +
+      '<label class="opcao"><input type="radio" name="xFmt" value="grade"><span><b>Só o calendário (grade)</b></span></label>' +
+      '<label class="opcao"><input type="radio" name="xFmt" value="lista"><span><b>Só a lista</b><small>Tabela com data, horário, evento, local, pastoral e responsável.</small></span></label>' +
+      '</div></div>' +
+      '<label class="check"><input type="checkbox" id="xPend"' + (CFG.mostrarPendentes !== false ? ' checked' : '') + '> Incluir pedidos aguardando aprovação (marcados “a confirmar”)</label>' +
+      '<label class="check"><input type="checkbox" id="xEsp" checked> Incluir feriados e datas especiais</label>' +
+      (filtros.length ? '<p class="alerta warn">Com o filtro escolhido: ' + esc(filtros.join(' · ')) + '. Para baixar tudo, tire o filtro antes.</p>' : '') +
+      '<p class="dica">O arquivo abre no Excel, no Google Planilhas ou no LibreOffice e já está ajustado para imprimir em folha A4 deitada.</p>' +
+      (S.embutido ? '<p class="dica">Se o arquivo não baixar aqui dentro do site, use “Abrir em tela cheia”, no topo, e baixe por lá.</p>' : '') +
+      '<div id="xResultado"></div>';
+    abrirJanela('Baixar planilha', corpo, [
+      { texto: 'Fechar', classe: 'ghost', acao: fecharJanela },
+      { texto: 'Gerar e baixar', classe: 'primario', acao: function (btn) { gerarPlanilhaDoDialogo(btn); } }
+    ]);
+    $('#xSemana').addEventListener('focus', function () { $('input[name="xPer"][value="semana"]').checked = true; });
+  }
+
+  function gerarPlanilhaDoDialogo(btn) {
+    var per = $('input[name="xPer"]:checked').value;
+    var p = partes(S.cursor);
+    var semana = $('#xSemana').value;
+    if (per === 'semana' && !valido(semana)) { toast('Escolha a semana.', true); return; }
+    var opts = {
+      periodo: per, ano: p.a, mes: p.m, semana: per === 'semana' ? inicioSemana(semana) : null,
+      formato: $('input[name="xFmt"]:checked').value, pendentes: $('#xPend').checked, especiais: $('#xEsp').checked
+    };
+    ocupado(btn, true, 'Gerando…');
+    gerarPlanilha(opts).then(function (arq) {
+      ocupado(btn, false);
+      ultimoArquivo = arq;
+      var compartilha = podeCompartilhar(arq);
+      var celular = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+      if (!(compartilha && celular)) baixarArquivo(arq.blob, arq.nome);
+      $('#xResultado').innerHTML = '<div class="alerta" style="background:var(--ok-soft);color:var(--ok);display:grid;gap:10px"><span><b>Pronto!</b> Planilha “' + esc(arq.nome) + '” gerada.' +
+        (compartilha && celular ? ' Toque em “Compartilhar” para mandar no WhatsApp ou salvar nos Arquivos.' : ' Se o download não começou, use o botão abaixo.') + '</span>' +
+        '<span class="acoes">' + (compartilha ? '<button type="button" class="btn ok" data-acao="x-compartilhar">Compartilhar (WhatsApp, e-mail…)</button>' : '') +
+        '<button type="button" class="btn" data-acao="x-baixar">Baixar arquivo</button></span></div>';
+    }, function (e) {
+      ocupado(btn, false);
+      $('#xResultado').innerHTML = '<p class="alerta erro">' + esc(e.message) + '</p>';
+    });
+  }
+
+  var ultimoArquivo = null;
+  function arquivoDe(arq) {
+    try { return new File([arq.blob], arq.nome, { type: arq.blob.type }); } catch (e) { return null; }
+  }
+  function podeCompartilhar(arq) {
+    if (window.__semCompartilhar || !navigator.share || !navigator.canShare) return false;
+    var f = arquivoDe(arq);
+    try { return !!(f && navigator.canShare({ files: [f] })); } catch (e) { return false; }
+  }
+  function compartilharArquivo(arq) {
+    var f = arquivoDe(arq);
+    navigator.share({ files: [f], title: arq.nome }).catch(function (e) {
+      if (!e || e.name !== 'AbortError') toast('Não foi possível compartilhar. Use “Baixar arquivo”.', true);
+    });
+  }
+
+  function baixarArquivo(blob, nome) {
+    if (window.__salvarArquivo) return window.__salvarArquivo(blob, nome);
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = nome;
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { a.remove(); }, 100);
+    return url;
+  }
+
+  function semAcento(s) { return s.normalize('NFD').replace(/[̀-ͯ]/g, ''); }
+
+  function gerarPlanilha(o) {
+    var ini, fim;
+    if (o.periodo === 'mes') { ini = iso(o.ano, o.mes, 1); fim = iso(o.ano, o.mes, diasNoMes(o.ano, o.mes)); }
+    else if (o.periodo === 'semana') { ini = o.semana; fim = somaDias(o.semana, 6); }
+    else { ini = iso(o.ano, 1, 1); fim = iso(o.ano, 12, 31); }
+    var anos = [];
+    for (var a = +ini.slice(0, 4); a <= +fim.slice(0, 4); a++) anos.push(a);
+    return Promise.all([carregarExcel(), obterLogo()].concat(anos.map(garantirAno))).then(function (res) {
+      var ExcelJS = res[0], logo = res[1];
+      var wb = new ExcelJS.Workbook();
+      logoXlsx = logo ? wb.addImage({ base64: logo.b64, extension: logo.ext }) : null;
+      wb.creator = CFG.nomeParoquia || 'Paróquia';
+      wb.created = new Date();
+      var evs = eventosEntre(ini, fim, { semPendentes: !o.pendentes });
+      var grade = o.formato !== 'lista', lista = o.formato !== 'grade';
+      var nome;
+      if (o.periodo === 'mes') {
+        if (grade) abaMes(wb, o.ano, o.mes, evs, o);
+        if (lista) abaLista(wb, 'Lista', ini, fim, evs, o, cap(MESES[o.mes - 1]) + ' de ' + o.ano);
+        nome = 'Calendario-' + o.ano + '-' + pad(o.mes) + '-' + semAcento(cap(MESES[o.mes - 1])) + '.xlsx';
+      } else if (o.periodo === 'semana') {
+        if (grade) abaSemana(wb, ini, evs, o);
+        if (lista) abaLista(wb, 'Lista', ini, fim, evs, o, 'Semana de ' + br(ini) + ' a ' + br(fim));
+        nome = 'Calendario-semana-' + ini.slice(8, 10) + '-' + ini.slice(5, 7) + '-a-' + fim.slice(8, 10) + '-' + fim.slice(5, 7) + '-' + fim.slice(0, 4) + '.xlsx';
+      } else {
+        if (grade) for (var m = 1; m <= 12; m++) abaMes(wb, o.ano, m, evs, o);
+        if (lista) abaLista(wb, 'Lista do ano', ini, fim, evs, o, 'Ano de ' + o.ano);
+        nome = 'Calendario-Paroquial-' + o.ano + '.xlsx';
+      }
+      if (S.fLocal || S.fPastoral) nome = nome.replace('.xlsx', '-filtrado.xlsx');
+      return wb.xlsx.writeBuffer().then(function (buf) {
+        return { blob: new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), nome: nome };
+      });
+    });
+  }
+
+  var AZUL = 'FF1F3A68', OURO = 'FF8A6512', CINZA = 'FF6B7486', LINHA = 'FFC3CAD6';
+  function borda() { var b = { style: 'thin', color: { argb: LINHA } }; return { top: b, left: b, bottom: b, right: b }; }
+  function filtroTexto() { return [S.fLocal, S.fPastoral].filter(Boolean).join(' · '); }
+
+  var logoXlsx = null, logoCache;
+  /** Lê a logo do topo (logo.png) e devolve em base64 para colocar na planilha. */
+  function obterLogo() {
+    if (logoCache !== undefined) return Promise.resolve(logoCache);
+    var img = $('#logoParoquia');
+    var src = img && !img.hidden ? img.src : '';
+    var deDataUrl = function (d) {
+      var m = String(d || '').match(/^data:image\/(png|jpe?g);base64,(.+)$/);
+      logoCache = m ? { ext: m[1] === 'png' ? 'png' : 'jpeg', b64: m[2] } : null;
+      return logoCache;
+    };
+    if (!src) return Promise.resolve(logoCache = null);
+    if (/^data:/.test(src)) return Promise.resolve(deDataUrl(src));
+    return fetch(src).then(function (r) { return r.blob(); }).then(function (b) {
+      return new Promise(function (ok) { var fr = new FileReader(); fr.onload = function () { ok(deDataUrl(fr.result)); }; fr.onerror = function () { ok(logoCache = null); }; fr.readAsDataURL(b); });
+    }).catch(function () { return (logoCache = null); });
+  }
+
+  function cabecalhoAba(ws, ncols, titulo) {
+    if (logoXlsx !== null) ws.addImage(logoXlsx, { tl: { col: 0.1, row: 0.08 }, ext: { width: 60, height: 60 }, editAs: 'oneCell' });
+    ws.mergeCells(1, 1, 1, ncols);
+    var c1 = ws.getCell(1, 1);
+    c1.value = CFG.nomeParoquia || 'Paróquia';
+    c1.font = { name: 'Calibri', size: 18, bold: true, color: { argb: AZUL } };
+    c1.alignment = { horizontal: 'center', vertical: 'middle' };
+    ws.getRow(1).height = 28;
+    ws.mergeCells(2, 1, 2, ncols);
+    var c2 = ws.getCell(2, 1);
+    var f = filtroTexto();
+    c2.value = (CFG.titulo || 'Calendário Paroquial') + ' — ' + titulo + (f ? '  (filtro: ' + f + ')' : '');
+    c2.font = { name: 'Calibri', size: 13, bold: true, color: { argb: 'FF333B4A' } };
+    c2.alignment = { horizontal: 'center', vertical: 'middle' };
+    ws.getRow(2).height = 22;
+  }
+
+  function linhasEventoRich(e) {
+    var pend = e.status === 'Pendente';
+    var tipo = prefixoTipo(e);
+    var det = ' (' + (e.locais || []).join(', ') + (e.pastoral ? ' · ' + e.pastoral : '') + ')' + (pend ? ' (a confirmar)' : '');
+    return [
+      { text: '\n' + (e.diaInteiro ? 'Dia inteiro' : e.inicio + (e.fim ? '–' + e.fim : '')) + ' ', font: { name: 'Calibri', size: 9, bold: true } },
+      { text: tipo + e.evento, font: { name: 'Calibri', size: 9, italic: pend } },
+      { text: det, font: { name: 'Calibri', size: 8, color: { argb: CINZA }, italic: pend } }
+    ];
+  }
+  function tamanhoTexto(rich) { return rich.reduce(function (s, r) { return s + r.text.length; }, 0); }
+  function contarLinhas(texto, largura) {
+    return texto.split('\n').reduce(function (s, l) { return s + Math.max(1, Math.ceil(l.length / largura)); }, 0);
+  }
+
+  function configPagina(ws, ultimaLinha, ncols, umaPagina) {
+    ws.pageSetup = {
+      paperSize: 9, orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: umaPagina ? 1 : 0,
+      horizontalCentered: true, margins: { left: 0.3, right: 0.3, top: 0.4, bottom: 0.4, header: 0.2, footer: 0.2 },
+      printArea: 'A1:' + String.fromCharCode(64 + ncols) + ultimaLinha
+    };
+  }
+
+  function rodapeAba(ws, linha, ncols, o) {
+    ws.mergeCells(linha, 1, linha, ncols);
+    var c = ws.getCell(linha, 1);
+    c.value = (o.pendentes ? '“(a confirmar)” = pedido aguardando aprovação da secretaria.  ' : '') +
+      'Gerado em ' + br(S.hoje) + (S.url ? ' · Calendário completo: ' + S.url : '');
+    c.font = { name: 'Calibri', size: 8, italic: true, color: { argb: CINZA } };
+    c.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true };
+    ws.getRow(linha).height = 24;
+  }
+
+  function abaMes(wb, a, m, evsTodos, o) {
+    var ws = wb.addWorksheet(cap(MESES[m - 1]), { views: [{ showGridLines: false }] });
+    var LARG = 25;
+    ws.columns = [0, 1, 2, 3, 4, 5, 6].map(function () { return { width: LARG }; });
+    cabecalhoAba(ws, 7, cap(MESES[m - 1]) + ' de ' + a);
+    var hr = ws.getRow(3);
+    DIAS.forEach(function (d, i) {
+      var c = hr.getCell(i + 1);
+      c.value = cap(d.split('-')[0]);
+      c.font = { name: 'Calibri', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
+      c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: AZUL } };
+      c.alignment = { horizontal: 'center', vertical: 'middle' };
+      c.border = borda();
+    });
+    hr.height = 20;
+    var ini = iso(a, m, 1), fim = iso(a, m, diasNoMes(a, m));
+    var evs = porDia(evsTodos.filter(function (e) { return e.data >= ini && e.data <= fim; }));
+    var dia = inicioSemana(ini), linha = 4;
+    do {
+      var maxL = 4;
+      var row = ws.getRow(linha);
+      for (var i = 0; i < 7; i++) {
+        var c = row.getCell(i + 1);
+        var fora = dia.slice(0, 7) !== ini.slice(0, 7);
+        var rich = [{ text: String(partes(dia).d), font: { name: 'Calibri', size: 12, bold: true, color: { argb: fora ? 'FFB0B7C3' : 'FF1A2335' } } }];
+        if (!fora) {
+          if (o.especiais) especiaisDe(dia).forEach(function (x) { rich.push({ text: '\n' + x.nome, font: { name: 'Calibri', size: 8.5, italic: true, bold: true, color: { argb: OURO } } }); });
+          (evs[dia] || []).forEach(function (e) { rich = rich.concat(linhasEventoRich(e)); });
+        }
+        c.value = { richText: rich };
+        c.alignment = { wrapText: true, vertical: 'top', horizontal: 'left' };
+        c.border = borda();
+        if (fora) c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF1F3F7' } };
+        else if (dia === S.hoje) c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF8E6' } };
+        var texto = rich.map(function (r) { return r.text; }).join('');
+        maxL = Math.max(maxL, contarLinhas(texto, LARG + 6));
+        dia = somaDias(dia, 1);
+      }
+      row.height = Math.max(70, maxL * 12 + 6);
+      linha++;
+    } while (dia <= fim);
+    rodapeAba(ws, linha, 7, o);
+    configPagina(ws, linha, 7, true);
+    return ws;
+  }
+
+  function abaSemana(wb, ini, evsTodos, o) {
+    var ws = wb.addWorksheet('Semana', { views: [{ showGridLines: false }] });
+    var LARG = 25;
+    ws.columns = [0, 1, 2, 3, 4, 5, 6].map(function () { return { width: LARG }; });
+    var fim = somaDias(ini, 6);
+    cabecalhoAba(ws, 7, 'Semana de ' + br(ini) + ' a ' + br(fim));
+    var hr = ws.getRow(3), row = ws.getRow(4), maxL = 10;
+    var evs = porDia(evsTodos);
+    for (var i = 0; i < 7; i++) {
+      var d = somaDias(ini, i);
+      var c = hr.getCell(i + 1);
+      c.value = cap(DIAS[i].split('-')[0]) + '\n' + br(d).slice(0, 5);
+      c.font = { name: 'Calibri', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
+      c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: AZUL } };
+      c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+      c.border = borda();
+      var rich = [];
+      if (o.especiais) especiaisDe(d).forEach(function (x) { rich.push({ text: (rich.length ? '\n' : '') + x.nome, font: { name: 'Calibri', size: 9, italic: true, bold: true, color: { argb: OURO } } }); });
+      (evs[d] || []).forEach(function (e) {
+        var r = linhasEventoRich(e);
+        if (!rich.length) r[0].text = r[0].text.replace(/^\n/, '');
+        else r[0].text = '\n' + r[0].text;
+        r[0].font.size = 10; r[1].font.size = 10; r[2].font.size = 9;
+        rich = rich.concat(r);
+      });
+      if (!rich.length) rich.push({ text: '—', font: { name: 'Calibri', size: 10, color: { argb: 'FFB0B7C3' } } });
+      var cc = row.getCell(i + 1);
+      cc.value = { richText: rich };
+      cc.alignment = { wrapText: true, vertical: 'top', horizontal: 'left' };
+      cc.border = borda();
+      maxL = Math.max(maxL, contarLinhas(rich.map(function (r) { return r.text; }).join(''), LARG + 2));
+    }
+    hr.height = 32;
+    row.height = Math.min(409, Math.max(200, maxL * 13 + 10));
+    rodapeAba(ws, 5, 7, o);
+    configPagina(ws, 5, 7, true);
+    return ws;
+  }
+
+  function abaLista(wb, nomeAba, ini, fim, evs, o, titulo) {
+    var ws = wb.addWorksheet(nomeAba, { views: [{ state: 'frozen', ySplit: 3, showGridLines: false }] });
+    var cols = [['Data', 11], ['Dia', 9], ['Horário', 13], ['Evento', 36], ['Tipo', 20], ['Local', 28], ['Pastoral / Movimento', 30], ['Responsável', 22], ['Situação', 14]];
+    ws.columns = cols.map(function (c) { return { width: c[1] }; });
+    cabecalhoAba(ws, cols.length, titulo);
+    var hr = ws.getRow(3);
+    cols.forEach(function (c, i) {
+      var cell = hr.getCell(i + 1);
+      cell.value = c[0];
+      cell.font = { name: 'Calibri', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: AZUL } };
+      cell.alignment = { vertical: 'middle' };
+      cell.border = borda();
+    });
+    hr.height = 20;
+    var linhas = [];
+    var porD = porDia(evs);
+    for (var d = ini; d <= fim; d = somaDias(d, 1)) {
+      if (o.especiais) especiaisDe(d).forEach(function (x) { linhas.push({ data: d, esp: x.nome }); });
+      (porD[d] || []).forEach(function (e) { linhas.push({ data: d, ev: e }); });
+    }
+    var r = 4, ultimaData = null, zebra = false;
+    linhas.forEach(function (l) {
+      if (l.data !== ultimaData) { zebra = !zebra; ultimaData = l.data; }
+      var p = partes(l.data);
+      var vals = l.esp
+        ? [new Date(Date.UTC(p.a, p.m - 1, p.d)), DIAS_C[diaSem(l.data)], '', l.esp, 'Data especial', '', '', '', '']
+        : [new Date(Date.UTC(p.a, p.m - 1, p.d)), DIAS_C[diaSem(l.data)], horario(l.ev), l.ev.evento, l.ev.tipo, (l.ev.locais || []).join(', '), l.ev.pastoral, l.ev.responsavel || '', l.ev.status === 'Pendente' ? 'A confirmar' : 'Confirmado'];
+      var row = ws.getRow(r);
+      vals.forEach(function (v, i) {
+        var c = row.getCell(i + 1);
+        c.value = v;
+        c.border = borda();
+        c.alignment = { vertical: 'top', wrapText: i >= 3 };
+        c.font = { name: 'Calibri', size: 10, italic: !!l.esp || (l.ev && l.ev.status === 'Pendente'), color: { argb: l.esp ? OURO : 'FF1A2335' }, bold: i === 0 };
+        if (zebra) c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF5F7FB' } };
+      });
+      row.getCell(1).numFmt = 'dd/mm/yyyy';
+      r++;
+    });
+    if (!linhas.length) {
+      ws.mergeCells(r, 1, r, cols.length);
+      ws.getCell(r, 1).value = 'Nenhuma reserva neste período.';
+      ws.getCell(r, 1).font = { name: 'Calibri', size: 10, italic: true, color: { argb: CINZA } };
+      r++;
+    }
+    ws.autoFilter = { from: { row: 3, column: 1 }, to: { row: Math.max(3, r - 1), column: cols.length } };
+    rodapeAba(ws, r + 1, cols.length, o);
+    configPagina(ws, r + 1, cols.length, false);
+    ws.pageSetup.printTitlesRow = '3:3';
+    return ws;
+  }
+
+  // ================================================================ copiar link
+  function copiarLink(pagina) {
+    if (!S.url) { toast('Abra o site publicado para copiar o link.', true); return; }
+    var link = S.url + (pagina ? '?pagina=' + pagina : '');
+    var mostrar = function () {
+      abrirJanela('Copie o link', '<p style="margin:0">Selecione e copie o endereço abaixo para enviar no WhatsApp ou e-mail:</p>' +
+        '<input type="text" id="linkCopiar" readonly value="' + esc(link) + '">', [{ texto: 'Fechar', classe: 'primario', acao: fecharJanela }]);
+      setTimeout(function () { var i = $('#linkCopiar'); if (i) { i.focus(); i.select(); } }, 60);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(link).then(function () { toast('Link copiado. É só colar no WhatsApp ou e-mail.'); }, mostrar);
+    } else mostrar();
+  }
+
+  // ================================================================ eventos da página
+  document.addEventListener('click', function (ev) {
+    var t = ev.target.closest('button, [data-dia], a');
+    if (!t) return;
+    var ir = t.getAttribute('data-ir');
+    if (ir) {
+      ev.preventDefault();
+      if (ir === 'reservar' && !$('#sucessoArea').hidden) limparForm(true);
+      irPara(ir);
+      return;
+    }
+    if (t.hasAttribute('data-ev')) { abrirEvento(t.getAttribute('data-ev')); return; }
+    if (t.classList.contains('mais')) { abrirDia(t.getAttribute('data-dia')); return; }
+    if (t.hasAttribute('data-vista')) { mudarVista(t.getAttribute('data-vista')); return; }
+    if (t.hasAttribute('data-remover')) { F.removidas[t.getAttribute('data-remover')] = true; F.avulsas = F.avulsas.filter(function (d) { return d !== t.getAttribute('data-remover'); }); atualizarForm(); return; }
+    if (t.hasAttribute('data-remover-extra')) { F.extras.splice(+t.getAttribute('data-remover-extra'), 1); atualizarForm(); return; }
+    if (t.hasAttribute('data-secaba')) { S.admin.aba = t.getAttribute('data-secaba'); renderSecretaria(); return; }
+    if (t.hasAttribute('data-editar')) { abrirEdicaoPorId(t.getAttribute('data-editar')); return; }
+    if (t.hasAttribute('data-cancelar')) {
+      var id = t.getAttribute('data-cancelar');
+      pedirTexto('Cancelar esta reserva?', 'Motivo (aparece para quem pediu)', 'Cancelar reserva', 'perigo', true).then(function (m) {
+        if (m === null) return;
+        mudarStatus([id], 'Cancelado', m, null);
+      });
+      return;
+    }
+    if (t.classList.contains('dia') && t.hasAttribute('data-dia')) { abrirDia(t.getAttribute('data-dia')); return; }
+    if (t.classList.contains('sem-dia')) return;
+    var acao = t.getAttribute('data-acao');
+    if (!acao) return;
+    switch (acao) {
+      case 'anterior': mover(-1); break;
+      case 'proximo': mover(1); break;
+      case 'hoje': S.cursor = S.vista === 'semana' ? inicioSemana(S.hoje) : S.hoje.slice(0, 8) + '01'; renderCalendario(); break;
+      case 'exportar': abrirExportar(); break;
+      case 'imprimir':
+        if (window.__semImpressao) { toast(window.__semImpressao, true); break; }
+        window.print(); break;
+      case 'fechar-dlg': fecharJanela(); break;
+      case 'add-avulsa': {
+        var d = $('#rAvulsa').value;
+        if (!valido(d)) { toast('Escolha a data para adicionar.', true); break; }
+        if (d < S.hoje && !S.modoSec) { toast('Essa data já passou.', true); break; }
+        if (!valido($('#rData').value)) { $('#rData').value = d; montarRepeticao(); }
+        else if (F.avulsas.indexOf(d) < 0 && datasPrincipais().indexOf(d) < 0) F.avulsas.push(d);
+        delete F.removidas[d];
+        $('#rAvulsa').value = '';
+        atualizarForm();
+        break;
+      }
+      case 'add-extra': {
+        var x = $('#xData').value, dia = $('#xDiaInteiro').checked;
+        if (!valido(x)) { toast('Escolha a data de preparação.', true); break; }
+        if (x < S.hoje && !S.modoSec) { toast('Essa data já passou.', true); break; }
+        var item = { data: x, tipo: $('#xTipo').value, diaInteiro: dia, inicio: dia ? '' : $('#xIni').value, fim: dia ? '' : $('#xFim').value };
+        if (!dia && (!item.inicio || !item.fim || minutos(item.fim) <= minutos(item.inicio))) { toast('Confira o horário: o término precisa ser depois do início.', true); break; }
+        F.extras.push(item);
+        $('#xData').value = '';
+        atualizarForm();
+        break;
+      }
+      case 'ver-no-calendario': {
+        var dd = t.getAttribute('data-data');
+        S.cursor = S.vista === 'semana' ? inicioSemana(dd) : dd.slice(0, 8) + '01';
+        irPara('calendario');
+        break;
+      }
+      case 'novo-pedido': limparForm(true); window.scrollTo(0, 0); break;
+      case 'sair-modo-sec': S.modoSec = false; aplicarMinimos(); renderResumo(); break;
+      case 'cancelar-marcadas': cancelarMarcadas(); break;
+      case 'marcar-todas': $$('.cCanc').forEach(function (i) { i.checked = true; }); break;
+      case 'sec-sair': sair(); break;
+      case 'sec-atualizar': carregarSecretaria(); break;
+      case 'sec-nova': S.modoSec = true; aplicarMinimos(); limparForm(false); irPara('reservar'); break;
+      case 'aprovar': {
+        var card = t.closest('.pedido-card'), ids = idsMarcados(card);
+        if (!ids.length) { toast('Marque as datas para aprovar.', true); break; }
+        mudarStatus(ids, 'Confirmado', '', t);
+        break;
+      }
+      case 'recusar': {
+        var card2 = t.closest('.pedido-card'), ids2 = idsMarcados(card2);
+        if (!ids2.length) { toast('Marque as datas para recusar.', true); break; }
+        pedirTexto('Recusar ' + (ids2.length === 1 ? '1 data' : ids2.length + ' datas') + '?', 'Motivo (vai para quem pediu)', 'Recusar', 'perigo', true).then(function (m) {
+          if (m === null) return;
+          mudarStatus(ids2, 'Recusado', m, null);
+        });
+        break;
+      }
+      case 'copiar-link': copiarLink(t.getAttribute('data-pagina')); break;
+      case 'x-compartilhar': if (ultimoArquivo) compartilharArquivo(ultimoArquivo); break;
+      case 'x-baixar': if (ultimoArquivo) baixarArquivo(ultimoArquivo.blob, ultimoArquivo.nome); break;
+    }
+  });
+
+  ['#irMes', '#irAno'].forEach(function (s) {
+    $(s).addEventListener('change', function () {
+      S.cursor = iso(+$('#irAno').value, +$('#irMes').value, 1);
+      if (S.vista === 'semana') S.cursor = inicioSemana(S.cursor);
+      renderCalendario();
+    });
+  });
+  $('#fLocal').addEventListener('change', function () { S.fLocal = this.value; renderCalendario(); });
+  $('#fPastoral').addEventListener('change', function () { S.fPastoral = this.value; renderCalendario(); });
+
+  var form = $('#formReserva');
+  form.addEventListener('submit', enviarForm);
+  form.addEventListener('input', function (ev) {
+    F.tocado = true;
+    var c = ev.target.closest('.campo.invalido');
+    if (c) { c.classList.remove('invalido'); var m = $('.erro-msg', c); if (m) m.remove(); }
+    if (ev.target.id === 'rEvento' || ev.target.id === 'rPastoralOutra') renderResumo();
+  });
+  form.addEventListener('change', function (ev) {
+    F.tocado = true;
+    var id = ev.target.id;
+    if (id === 'rData') { F.removidas = {}; montarRepeticao(); }
+    if (id === 'rRep' || id === 'rAte') F.removidas = {};
+    if (id === 'rAvulsa' || id === 'xData' || id === 'xTipo') return;
+    atualizarForm();
+  });
+  $('#formConsulta').addEventListener('submit', consultar);
+  $('#formLogin').addEventListener('submit', entrar);
+  ['#tMes', '#tStatus', '#tLocal'].forEach(function (s) { $(s).addEventListener('change', renderTodas); });
+  $('#tBusca').addEventListener('input', renderTodas);
+  $('#tAno').addEventListener('change', function () { S.admin.ano = +this.value; carregarSecretaria(); });
+
+  // ================================================================ início
+  function mostrarErroGeral(msg) {
+    $('#principal').querySelectorAll('.pagina').forEach(function (p) { p.hidden = true; });
+    $('#erroGeral').hidden = false;
+    $('#erroGeral').innerHTML = '<div class="painel"><h3>Não foi possível abrir o calendário</h3><p class="alerta erro">' + esc(msg) + '</p>' +
+      '<p class="meta">Confira a internet e recarregue a página. Se continuar, avise quem cuida do sistema: pode faltar configurar a planilha ' +
+      '(menu <b>📅 Calendário › Configurar planilha</b>) ou o endereço da API no <b>config.js</b>.</p>' +
+      '<div><button class="btn primario" onclick="location.reload()">Tentar de novo</button></div></div>';
+  }
+
+  function valorSelect(sel, html) {
+    var v = sel.value;
+    sel.innerHTML = html;
+    if ($$('option', sel).some(function (o) { return o.value === v; })) sel.value = v;
+  }
+
+  /** Aplica nome, locais, pastorais etc. vindos da aba Configurações. */
+  function aplicarConfig() {
+    $$('.js-nome').forEach(function (e) { e.textContent = CFG.nomeParoquia || ''; });
+    $('#nomeParoquia').textContent = CFG.nomeParoquia || 'Paróquia';
+    $('#tituloCal').textContent = CFG.titulo || 'Calendário Paroquial';
+    $('#rodapeContato').textContent = CFG.contato ? ' · Secretaria: ' + CFG.contato : '';
+    document.title = (CFG.titulo || 'Calendário Paroquial') + ' · ' + (CFG.nomeParoquia || 'Paróquia');
+    var a0 = +S.hoje.slice(0, 4);
+    valorSelect($('#irAno'), [a0 - 1, a0, a0 + 1, a0 + 2].map(function (a) { return '<option value="' + a + '">' + a + '</option>'; }).join(''));
+    valorSelect($('#fLocal'), '<option value="">Todos os locais</option>' + (CFG.locais || []).map(function (l) { return '<option>' + esc(l.nome) + '</option>'; }).join(''));
+    valorSelect($('#fPastoral'), '<option value="">Todas as pastorais</option>' + (CFG.pastorais || []).map(function (p) { return '<option>' + esc(p) + '</option>'; }).join(''));
+    if (!F.tocado) montarForm();
+    montarFiltrosTodas();
+  }
+
+  function receberDados(boot, doCache) {
+    CFG = boot.config || {};
+    if (boot.hoje && !doCache) S.hoje = boot.hoje;
+    S.anos = {};
+    Object.keys(boot.anos || {}).forEach(function (a) { S.anos[a] = boot.anos[a]; });
+    cacheEsp = {};
+  }
+
+  function paginaInicial() {
+    var pg = '';
+    try { pg = new URLSearchParams(location.search).get('pagina') || ''; } catch (e) { /* navegador antigo */ }
+    if (!pg && location.hash) pg = location.hash.slice(1);
+    pg = pg.toLowerCase().replace(/[^a-z-]/g, '');
+    if (pg === 'formulario' || pg === 'reserva') pg = 'reservar';
+    if (pg === 'meupedido' || pg === 'pedido') pg = 'meu-pedido';
+    if (pg === 'admin') pg = 'secretaria';
+    return pg || 'calendario';
+  }
+
+  function iniciar() {
+    var logo = $('#logoParoquia');
+    logo.addEventListener('error', function () { logo.hidden = true; });
+    $('#logoPrint').src = logo.getAttribute('src');
+    $('#irMes').innerHTML = MESES.map(function (m, i) { return '<option value="' + (i + 1) + '">' + cap(m) + '</option>'; }).join('');
+    var tel = ler('ultimoTel');
+    if (tel) $('#cTel').value = tel;
+    var senha = lerSessao('calparoquial.sec');
+    if (senha) { S.admin.senha = senha; $('#tabSecretaria').hidden = false; }
+    S.embutido = !!S.url && dentroDeOutroSite();
+    $('#tabTelaCheia').hidden = !S.embutido;
+
+    var pronto = false;
+    function mostrar() {
+      aplicarConfig();
+      iniciarCursor();
+      irPara(paginaInicial(), true);
+      atualizarForm();
+      pronto = true;
+    }
+    // 1) mostra na hora a última versão salva neste aparelho (se houver)
+    var salvo = window.__semCache ? null : lerJSON('dados');
+    if (salvo && salvo.config) { receberDados(salvo, true); mostrar(); }
+    // 2) busca a versão atual no servidor
+    api('inicio').then(function (boot) {
+      if (!window.__semCache) guardar('dados', JSON.stringify(boot));
+      var antes = JSON.stringify(CFG);
+      receberDados(boot, false);
+      if (!pronto) { mostrar(); return; }
+      if (JSON.stringify(CFG) !== antes) aplicarConfig();
+      if (S.pagina === 'calendario') renderCalendario();
+    }, function (e) {
+      if (pronto) toast('Sem conexão com o servidor: mostrando a última versão salva neste aparelho.', true);
+      else mostrarErroGeral(e.message);
+    });
+
+    // site instalável (PWA): guarda a página para abrir rápido e sem internet
+    if ('serviceWorker' in navigator && !window.__semSW && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+      navigator.serviceWorker.register('sw.js').catch(function () { /* sem PWA, segue normal */ });
+    }
+  }
+
+  window.__app = { S: S, especiais: especiais, gerarRecorrencia: gerarRecorrencia, gerarPlanilha: gerarPlanilha, irPara: irPara, toast: toast };
+  iniciar();
+})();
+</script>
+</body>
+</html>

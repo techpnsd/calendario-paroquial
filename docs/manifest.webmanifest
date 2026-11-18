@@ -1,0 +1,16 @@
+{
+  "name": "Calendário Paroquial · Paróquia Nossa Senhora das Dores",
+  "short_name": "Calendário",
+  "description": "Calendário e reserva de espaços da Paróquia Nossa Senhora das Dores.",
+  "lang": "pt-BR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f2f4f8",
+  "theme_color": "#1f3a68",
+  "icons": [
+    { "src": "icone-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icone-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
