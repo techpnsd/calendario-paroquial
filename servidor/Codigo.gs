@@ -149,6 +149,7 @@ const ACOES_ = {
   enviarPedido: enviarPedido,
   consultarPedido: consultarPedido,
   cancelarPedido: cancelarPedido,
+  editarPedido: editarPedido,
   entrarSecretaria: entrarSecretaria,
   listarSecretaria: listarSecretaria,
   alterarStatus: alterarStatus,
@@ -372,6 +373,155 @@ function cancelarPedido(numero, telefone, ids) {
     '<p><b>' + esc_(linhas[0].responsavel) + '</b> cancelou ' + canceladas.length + ' data(s) do pedido nº ' + linhas[0].pedido + ':</p>' +
     listaDatasHtml_(canceladas));
   return pedidoParaSolicitante_(linhas, cfg);
+}
+
+/**
+ * O próprio solicitante edita o pedido (número + telefone).
+ * mudancas = { evento, pastoral, locais, responsavel, telefone, email, obs,
+ *              datas: [{id?, data, diaInteiro, inicio, fim, tipo}],   // id vazio = data nova
+ *              remover: [id, ...] }                                    // datas a cancelar
+ * Datas que mudaram (data, horário, tipo ou local) e datas novas seguem o modo de
+ * aprovação: no Manual voltam a aguardar a secretaria. Mudar só nome, contato ou
+ * observações não muda a situação. Datas que já passaram não mudam.
+ */
+function editarPedido(numero, telefone, mudancas) {
+  const cfg = lerConfig_();
+  mudancas = mudancas || {};
+  const p = validarDadosPedido_(mudancas, false);
+  const lista = Array.isArray(mudancas.datas) ? mudancas.datas : [];
+  const remover = (Array.isArray(mudancas.remover) ? mudancas.remover : []).map(String);
+  if (lista.length > 300) erro_('São muitas datas em um pedido só (máximo 300).');
+
+  const lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  let resumo, n, l0;
+  const mudou = [];
+  try {
+    const base = lerReservas_();
+    const linhas = linhasDoPedido_(base.linhas, numero, telefone);
+    l0 = linhas[0];
+    n = l0.pedido;
+    const hoje = hojeIso_();
+    const ativa = function (l) { return (l.status === ST.PENDENTE || l.status === ST.CONFIRMADO) && l.data >= hoje; };
+    const porId = {};
+    linhas.forEach(function (l) { porId[l.id] = l; });
+
+    // datas enviadas: editadas (com id) e novas (sem id)
+    const editadas = {}, novas = [];
+    lista.forEach(function (d) {
+      const nd = normalizarDataPedido_(d, false, false);
+      if (d && d.id) {
+        const l = porId[String(d.id)];
+        if (!l) erro_('Uma das datas não pertence a este pedido. Recarregue a página e tente de novo.');
+        if (ativa(l)) editadas[l.id] = nd;
+      } else {
+        novas.push(nd);
+      }
+    });
+    remover.forEach(function (id) { if (!porId[id]) erro_('Uma das datas não pertence a este pedido. Recarregue a página e tente de novo.'); });
+
+    // o que muda em cada data ativa
+    const locaisTxt = p.locais.join(', ');
+    const alvo = [];
+    linhas.forEach(function (l) {
+      if (!ativa(l) || remover.indexOf(l.id) >= 0) return;
+      const nd = editadas[l.id] || { data: l.data, diaInteiro: l.diaInteiro, inicio: l.inicio, fim: l.fim, tipo: l.tipo };
+      const muda = nd.data !== l.data || horarioTexto_(nd) !== horarioTexto_(l) || nd.tipo !== l.tipo || locaisTxt !== l.locais.join(', ');
+      if (muda) alvo.push({ l: l, nd: nd });
+    });
+    const datasConf = alvo.map(function (a) { return a.nd; }).concat(novas);
+    const conflitos = calcularConflitos_(datasConf, p.locais, base.linhas, cfg, linhas.map(function (l) { return l.id; }), null);
+    const statusPara = function (temConflito) {
+      if (cfg.modo === MODO.AUTO) return ST.CONFIRMADO;
+      if (cfg.modo === MODO.SEM_CONFLITO && !temConflito) return ST.CONFIRMADO;
+      return ST.PENDENTE;
+    };
+
+    const agora = new Date();
+    const quando = Utilities.formatDate(agora, tz_(), 'dd/MM/yyyy');
+    let alteradas = 0, canceladas = 0, pendentes = 0, textos = false;
+    const alvoPorId = {};
+    alvo.forEach(function (a, i) { alvoPorId[a.l.id] = { nd: a.nd, conflitos: conflitos[i] }; });
+
+    // nome, contato e observações valem para o pedido inteiro
+    const TEXTO = [[COL.EVENTO, 'evento'], [COL.PASTORAL, 'pastoral'], [COL.RESPONSAVEL, 'responsavel'], [COL.TELEFONE, 'telefone'], [COL.EMAIL, 'email'], [COL.OBS, 'obs']];
+    TEXTO.forEach(function (t) { if (String(l0[t[1]] || '') !== String(p[t[1]] || '')) { textos = true; mudou.push(t[1] === 'obs' ? 'observações' : t[1] + ': ' + p[t[1]]); } });
+
+    linhas.forEach(function (l) {
+      const campos = {};
+      TEXTO.forEach(function (t) { if (String(l[t[1]] || '') !== String(p[t[1]] || '')) campos[t[0]] = p[t[1]]; });
+      if (ativa(l) && remover.indexOf(l.id) >= 0) {
+        campos[COL.STATUS] = ST.CANCELADO;
+        campos[COL.OBS_SECRETARIA] = juntarObs_(l.obsSecretaria, 'Cancelado pelo solicitante em ' + quando);
+        canceladas++;
+        mudou.push('cancelou ' + dataBr_(l.data));
+      } else if (alvoPorId[l.id]) {
+        const a = alvoPorId[l.id], nd = a.nd;
+        const st = statusPara(a.conflitos.length > 0);
+        campos[COL.DATA] = nd.data;
+        campos[COL.INICIO] = nd.diaInteiro ? DIA_INTEIRO : nd.inicio;
+        campos[COL.FIM] = nd.diaInteiro ? '' : nd.fim;
+        campos[COL.TIPO] = nd.tipo;
+        campos[COL.LOCAL] = locaisTxt;
+        campos[COL.STATUS] = st;
+        campos[COL.OBS_SECRETARIA] = juntarObs_(l.obsSecretaria, 'Alterado pelo solicitante em ' + quando +
+          ' (antes: ' + dataBr_(l.data) + ' ' + horarioTexto_(l) + ' · ' + l.locais.join(', ') + ')');
+        alteradas++;
+        if (st === ST.PENDENTE) pendentes++;
+        mudou.push(dataBr_(l.data) + ' ' + horarioTexto_(l) + ' → ' + dataBr_(nd.data) + ' ' + horarioTexto_(nd));
+      }
+      if (Object.keys(campos).length) {
+        campos[COL.ATUALIZADO] = agora;
+        escreverCampos_(base, l.linha, campos);
+      }
+    });
+
+    // datas novas: mesmas informações do pedido
+    const offset = alvo.length;
+    const linhasNovas = novas.map(function (nd, i) {
+      const st = statusPara(conflitos[offset + i].length > 0);
+      if (st === ST.PENDENTE) pendentes++;
+      mudou.push('nova data ' + dataBr_(nd.data) + ' ' + horarioTexto_(nd));
+      const campos = {};
+      campos[COL.DATA] = nd.data;
+      campos[COL.INICIO] = nd.diaInteiro ? DIA_INTEIRO : nd.inicio;
+      campos[COL.FIM] = nd.diaInteiro ? '' : nd.fim;
+      campos[COL.EVENTO] = p.evento;
+      campos[COL.TIPO] = nd.tipo;
+      campos[COL.PASTORAL] = p.pastoral;
+      campos[COL.LOCAL] = locaisTxt;
+      campos[COL.STATUS] = st;
+      campos[COL.RESPONSAVEL] = p.responsavel;
+      campos[COL.TELEFONE] = p.telefone;
+      campos[COL.EMAIL] = p.email;
+      campos[COL.OBS] = p.obs;
+      campos[COL.PEDIDO] = n;
+      campos[COL.REPETICAO] = l0.repeticao;
+      campos[COL.ENVIADO] = agora;
+      campos[COL.ATUALIZADO] = agora;
+      campos[COL.OBS_SECRETARIA] = 'Adicionada pelo solicitante em ' + quando;
+      campos[COL.ID] = novoId_();
+      return montarLinha_(base, campos);
+    });
+    acrescentarLinhas_(base.sh, linhasNovas);
+
+    resumo = { alteradas: alteradas, novas: novas.length, canceladas: canceladas, pendentes: pendentes, textos: textos };
+    if (alteradas || novas.length || canceladas || textos) {
+      registrarHistorico_(n, 'Editado pelo solicitante', mudou.join(' · ').slice(0, 1900), p.responsavel);
+    }
+  } finally {
+    lock.releaseLock();
+  }
+
+  const atual = lerReservas_().linhas.filter(function (l) { return l.pedido === n; });
+  if (resumo.alteradas || resumo.novas || resumo.canceladas || resumo.textos) {
+    avisarSecretaria_(cfg, 'Pedido nº ' + n + ' alterado pelo solicitante: ' + p.evento,
+      '<p><b>' + esc_(p.responsavel) + '</b> alterou o pedido nº ' + n + ' (' + esc_(p.evento) + '):</p>' +
+      '<ul style="padding-left:20px">' + mudou.map(function (m) { return '<li>' + esc_(m) + '</li>'; }).join('') + '</ul>' +
+      (resumo.pendentes ? '<p><b>' + resumo.pendentes + ' data(s) aguardam aprovação.</b></p>' : '') +
+      linkHtml_(cfg, 'Abrir a área da secretaria', 'secretaria'));
+  }
+  return { pedido: pedidoParaSolicitante_(atual, cfg), resumo: resumo };
 }
 
 // ------------------------------------------------------ área da secretaria
@@ -1113,7 +1263,7 @@ function normalizarDataPedido_(d, permitirPassado, semErro) {
   return o;
 }
 
-function validarPedido_(p, ehSecretaria, cfg) {
+function validarDadosPedido_(p, ehSecretaria) {
   if (!p || typeof p !== 'object') erro_('Pedido inválido. Recarregue a página e tente de novo.');
   const o = {
     pastoral: limparTexto_(p.pastoral, 100),
@@ -1131,7 +1281,11 @@ function validarPedido_(p, ehSecretaria, cfg) {
   if (!ehSecretaria && o.telefone.replace(/\D/g, '').length < 8) erro_('Informe um telefone com DDD.');
   if (o.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(o.email)) erro_('O e-mail parece estar incompleto. Confira ou deixe em branco.');
   if (!o.locais.length) erro_('Escolha pelo menos um local.');
+  return o;
+}
 
+function validarPedido_(p, ehSecretaria, cfg) {
+  const o = validarDadosPedido_(p, ehSecretaria);
   const lista = Array.isArray(p.datas) ? p.datas : [];
   if (!lista.length) erro_('Escolha pelo menos uma data.');
   if (lista.length > 300) erro_('São muitas datas em um pedido só (máximo 300). Divida em mais de um pedido.');
@@ -1178,6 +1332,11 @@ function pedidoParaSolicitante_(linhas, cfg) {
     evento: l0.evento,
     pastoral: l0.pastoral,
     responsavel: l0.responsavel,
+    telefone: l0.telefone,
+    email: l0.email,
+    obs: l0.obs,
+    hoje: hojeIso_(),
+    modo: cfg.modo,
     locais: l0.locais,
     repeticao: l0.repeticao,
     enviado: l0.enviado,
