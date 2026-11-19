@@ -143,7 +143,7 @@ textarea { resize: vertical; min-height: 84px; }
 input:focus, select:focus, textarea:focus { border-color: var(--focus); outline: 2px solid color-mix(in srgb, var(--focus) 35%, transparent); outline-offset: 0; }
 .campo.invalido input, .campo.invalido select, .campo.invalido .chips-check { border-color: var(--bad); }
 .erro-msg { color: var(--bad); font-size: 14px; font-weight: 600; margin: 0; }
-.linha2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px 16px; }
+.linha2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px 16px; align-items: start; }
 .check { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500; }
 .check input { width: 20px; height: 20px; accent-color: var(--primary); }
 
@@ -328,6 +328,21 @@ input:focus, select:focus, textarea:focus { border-color: var(--focus); outline:
 .pc-datas li.conflito { border-color: color-mix(in srgb, var(--warn) 50%, var(--line)); background: var(--warn-soft); }
 .pc-datas .conf { font-size: 14px; color: var(--warn); margin-left: 30px; }
 .filtros { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+/* editar o próprio pedido */
+.ed-datas { display: grid; gap: 8px; }
+.ed-linha { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 10px 12px; background: var(--surface); }
+.ed-linha input[type="date"] { width: 175px; }
+.ed-linha input[type="time"] { width: 118px; }
+.ed-linha select { width: auto; max-width: 220px; }
+.ed-linha .hs { display: inline-flex; align-items: center; gap: 6px; }
+.ed-acoes { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; }
+.ed-linha.conflito { border-color: color-mix(in srgb, var(--warn) 55%, var(--line)); background: var(--warn-soft); }
+.ed-linha.removida { background: var(--surface-2); }
+.ed-linha.removida input, .ed-linha.removida select, .ed-linha.removida .check { opacity: .55; text-decoration: line-through; }
+.ed-linha.invalida { border-color: var(--bad); box-shadow: inset 3px 0 0 var(--bad); }
+.ed-conf { flex-basis: 100%; font-size: 14px; color: var(--warn); }
+.alerta.ok-msg { background: var(--ok-soft); color: var(--ok); }
+@media (max-width: 700px) { .ed-acoes { margin-left: 0; width: 100%; justify-content: space-between; } }
 .filtros select, .filtros input { width: auto; flex: 1 1 150px; max-width: 260px; }
 .acoes-linha { display: flex; gap: 6px; flex-wrap: wrap; }
 
@@ -1722,9 +1737,12 @@ footer.rodape .links { display: flex; flex-wrap: wrap; gap: 6px 18px; }
     });
   }
 
-  function renderConsulta(r) {
+  function renderConsulta(r, msgOk) {
+    fecharEdicao();
+    if (consultaAtual) consultaAtual.r = r;
     var ativas = r.datas.filter(function (d) { return d.status === 'Pendente' || d.status === 'Confirmado'; });
-    var html = '<div class="painel">' +
+    var editaveis = r.datas.filter(function (d) { return podeEditar(d, r.hoje || S.hoje); });
+    var html = '<div class="painel">' + (msgOk ? '<p class="alerta ok-msg" role="status">' + esc(msgOk) + '</p>' : '') +
       '<div><span class="pc-num">Pedido nº ' + r.pedido + '</span><h3>' + esc(r.evento) + '</h3>' +
       '<p class="meta">' + esc(r.pastoral) + ' · ' + esc(r.locais.join(', ')) + ' · ' + esc(r.responsavel) + '</p></div>' +
       '<table class="datas-tab"><thead><tr>' + (ativas.length ? '<th style="width:36px"><span hidden>Marcar</span></th>' : '') + '<th>Data</th><th>Horário</th><th>Situação</th></tr></thead><tbody>' +
@@ -1736,11 +1754,230 @@ footer.rodape .links { display: flex; flex-wrap: wrap; gap: 6px 18px; }
           '<td><span class="badge ' + ST_CLASSE[d.status] + '">' + esc(ST_ROTULO[d.status]) + '</span>' +
           (d.obsSecretaria ? '<br><span class="dica">' + esc(d.obsSecretaria) + '</span>' : '') + '</td></tr>';
       }).join('') + '</tbody></table>' +
-      (ativas.length ? '<div class="acoes"><button class="btn perigo" data-acao="cancelar-marcadas">Cancelar datas marcadas</button>' +
-        '<button class="btn ghost" data-acao="marcar-todas">Marcar todas</button></div>' : '') +
-      '<p class="dica">Precisa mudar uma data ou horário? Cancele a data aqui e faça um novo pedido' + (r.contato ? ', ou fale com a secretaria: ' + esc(r.contato) : ', ou fale com a secretaria') + '.</p>' +
+      (ativas.length || editaveis.length ? '<div class="acoes">' +
+        (editaveis.length ? '<button class="btn primario" data-acao="editar-pedido">Editar pedido</button>' : '') +
+        (ativas.length ? '<button class="btn perigo" data-acao="cancelar-marcadas">Cancelar datas marcadas</button>' +
+          '<button class="btn ghost" data-acao="marcar-todas">Marcar todas</button>' : '') + '</div>' : '') +
+      '<p class="dica">' + (editaveis.length ? 'Para mudar data, horário, local ou adicionar datas, use “Editar pedido”. ' : '') +
+      'Dúvidas' + (r.contato ? ': secretaria, ' + esc(r.contato) : ': fale com a secretaria') + '.</p>' +
       '</div>';
     $('#consultaRes').innerHTML = html;
+  }
+
+  // ---------- o solicitante edita o próprio pedido
+  var ED = null;
+  function fecharEdicao() { if (ED) clearTimeout(ED.timer); ED = null; }
+  function podeEditar(d, hoje) { return (d.status === 'Pendente' || d.status === 'Confirmado') && d.data >= hoje; }
+
+  function abrirEdicaoPedido() {
+    var r = consultaAtual && consultaAtual.r;
+    if (!r) return;
+    var hoje = r.hoje || S.hoje;
+    ED = {
+      hoje: hoje,
+      ids: r.datas.map(function (d) { return d.id; }),
+      linhas: r.datas.filter(function (d) { return podeEditar(d, hoje); }).map(function (d) {
+        return { id: d.id, data: d.data, diaInteiro: d.diaInteiro, inicio: d.inicio || '19:00', fim: d.fim || '21:00', tipo: d.tipo, status: d.status, remover: false };
+      }),
+      timer: null, seq: 0
+    };
+    var fixas = r.datas.filter(function (d) { return !podeEditar(d, hoje); });
+    var pastorais = (CFG.pastorais || []).slice();
+    var outra = !!r.pastoral && pastorais.indexOf(r.pastoral) < 0;
+    var locaisOp = (CFG.locais || []).map(function (l) { return l.nome; });
+    (r.locais || []).forEach(function (x) { if (locaisOp.indexOf(x) < 0) locaisOp.push(x); });
+    var aviso = {
+      'Automática': 'As mudanças valem na hora.',
+      'Automática sem conflito': 'Datas alteradas são confirmadas na hora se o local estiver livre. Se houver conflito, aguardam a secretaria.'
+    }[r.modo] || 'Se você mudar a data, o horário ou o local, essas datas voltam a aguardar a aprovação da secretaria. Mudar só o nome, o contato ou as observações não muda a situação.';
+    var html = '<div class="painel">' +
+      '<div><span class="pc-num">Pedido nº ' + r.pedido + '</span><h3>Editar pedido</h3></div>' +
+      '<p class="aviso">' + esc(aviso) + '</p>' +
+      '<div class="campo"><label for="pEvento">Nome do evento</label><input type="text" id="pEvento" maxlength="150" value="' + esc(r.evento) + '"></div>' +
+      '<div class="linha2"><div class="campo"><label for="pPastoral">Pastoral ou movimento</label><select id="pPastoral">' +
+      pastorais.map(function (x) { return '<option' + (x === r.pastoral ? ' selected' : '') + '>' + esc(x) + '</option>'; }).join('') +
+      '<option value="__outra"' + (outra ? ' selected' : '') + '>Outra (escrever o nome)</option></select>' +
+      '<input type="text" id="pPastoralOutra" placeholder="Nome da pastoral ou movimento" value="' + (outra ? esc(r.pastoral) : '') + '"' + (outra ? '' : ' hidden') + '></div>' +
+      '<div class="campo"><label for="pResp">Responsável</label><input type="text" id="pResp" value="' + esc(r.responsavel) + '"></div></div>' +
+      '<div class="linha2"><div class="campo"><label for="pTel">Telefone / WhatsApp</label><input type="tel" id="pTel" inputmode="tel" value="' + esc(r.telefone) + '">' +
+      '<p class="dica">É com ele que você consulta este pedido.</p></div>' +
+      '<div class="campo"><label for="pEmail">E-mail <span class="opc">(opcional)</span></label><input type="email" id="pEmail" value="' + esc(r.email) + '"></div></div>' +
+      '<div class="campo"><span class="label" id="lblPLocais">Local</span><div class="chips-check" id="pLocais" role="group" aria-labelledby="lblPLocais">' +
+      locaisOp.map(function (x, i) {
+        return '<label class="chip-op" style="--c:' + corLocal(x) + '"><input type="checkbox" id="pLoc' + i + '" value="' + esc(x) + '"' + ((r.locais || []).indexOf(x) >= 0 ? ' checked' : '') + '><span>' + esc(x) + '</span></label>';
+      }).join('') + '</div></div>' +
+      '<div class="campo"><label for="pObs">Observações para a secretaria <span class="opc">(opcional)</span></label><textarea id="pObs" rows="3" maxlength="1500">' + esc(r.obs) + '</textarea></div>' +
+      '<div class="campo"><span class="label">Datas</span><div class="ed-datas" id="pDatas"></div>' +
+      '<div><button type="button" class="btn" data-acao="ed-add">+ Adicionar data</button></div>' +
+      (fixas.length ? '<p class="dica">Não dá para alterar (já passaram, canceladas ou recusadas): ' +
+        fixas.map(function (d) { return esc(brCurto(d.data)) + ' (' + esc(ST_ROTULO[d.status].toLowerCase()) + ')'; }).join(', ') + '.</p>' : '') +
+      '</div>' +
+      '<p class="dispo info" id="pDispo" hidden></p>' +
+      '<p class="alerta erro" id="pErro" hidden></p>' +
+      '<div class="acoes"><button type="button" class="btn primario" data-acao="ed-salvar">Salvar alterações</button>' +
+      '<button type="button" class="btn ghost" data-acao="ed-desistir">Desistir</button></div>' +
+      '</div>';
+    $('#consultaRes').innerHTML = html;
+    renderLinhasEdicao();
+    agendarConflitosEdicao();
+    $('#consultaRes').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function htmlTiposEd(sel) {
+    var tipos = (CFG.tipos || ['Evento']).slice();
+    if (sel && tipos.indexOf(sel) < 0) tipos.push(sel);
+    return tipos.map(function (t) { return '<option' + (t === sel ? ' selected' : '') + '>' + esc(t) + '</option>'; }).join('');
+  }
+
+  function renderLinhasEdicao() {
+    $('#pDatas').innerHTML = ED.linhas.map(function (l, i) {
+      var off = l.remover ? ' disabled' : '';
+      return '<div class="ed-linha' + (l.remover ? ' removida' : '') + '" data-i="' + i + '">' +
+        '<input type="date" class="ed-data" value="' + esc(l.data) + '" min="' + ED.hoje + '" aria-label="Data"' + off + '>' +
+        '<label class="check"><input type="checkbox" class="ed-dia"' + (l.diaInteiro ? ' checked' : '') + off + '> Dia inteiro</label>' +
+        '<span class="hs"' + (l.diaInteiro ? ' hidden' : '') + '><input type="time" class="ed-ini" value="' + esc(l.inicio) + '" aria-label="Início"' + off + '> às ' +
+        '<input type="time" class="ed-fim" value="' + esc(l.fim) + '" aria-label="Término"' + off + '></span>' +
+        '<select class="ed-tipo" aria-label="Tipo"' + off + '>' + htmlTiposEd(l.tipo) + '</select>' +
+        '<span class="ed-acoes"><span class="badge ' + (l.remover ? 'canc' : l.id ? ST_CLASSE[l.status] : 'tipo') + '">' +
+        (l.remover ? 'Será cancelada' : l.id ? esc(ST_ROTULO[l.status]) : 'Data nova') + '</span>' +
+        '<button type="button" class="btn sm ghost" data-ed-remover="' + i + '">' + (l.remover ? 'Desfazer' : 'Tirar') + '</button></span>' +
+        '<span class="ed-conf" hidden></span></div>';
+    }).join('') || '<p class="meta">Nenhuma data. Use “Adicionar data”.</p>';
+    mostrarConflitosEdicao();
+  }
+
+  function lerEdicao() {
+    $$('#pDatas .ed-linha').forEach(function (el) {
+      var l = ED.linhas[+el.getAttribute('data-i')];
+      if (!l || l.remover) return;
+      l.data = $('.ed-data', el).value;
+      l.diaInteiro = $('.ed-dia', el).checked;
+      l.inicio = $('.ed-ini', el).value;
+      l.fim = $('.ed-fim', el).value;
+      l.tipo = $('.ed-tipo', el).value;
+    });
+  }
+  function dadosEdicao() {
+    var pv = $('#pPastoral').value;
+    return {
+      evento: $('#pEvento').value.trim(),
+      pastoral: pv === '__outra' ? $('#pPastoralOutra').value.trim() : pv,
+      responsavel: $('#pResp').value.trim(),
+      telefone: $('#pTel').value.trim(),
+      email: $('#pEmail').value.trim(),
+      obs: $('#pObs').value.trim(),
+      locais: $$('#pLocais input:checked').map(function (i) { return i.value; })
+    };
+  }
+
+  function mostrarConflitosEdicao() {
+    var n = 0;
+    $$('#pDatas .ed-linha').forEach(function (el) {
+      var l = ED.linhas[+el.getAttribute('data-i')];
+      var c = (l && !l.remover && l.conf) || [];
+      if (c.length) n++;
+      el.classList.toggle('conflito', c.length > 0);
+      var box = $('.ed-conf', el);
+      box.hidden = !c.length;
+      box.textContent = c.map(function (x) {
+        return 'Já reservado: ' + x.evento + ' (' + x.locais.join(', ') + ', ' + horario(x) + ')' + (x.status === 'Pendente' ? ', aguardando aprovação' : '');
+      }).join(' · ');
+    });
+    return n;
+  }
+
+  function agendarConflitosEdicao() {
+    if (!ED) return;
+    clearTimeout(ED.timer);
+    lerEdicao();
+    var dispo = $('#pDispo');
+    var locais = dadosEdicao().locais;
+    var alvo = ED.linhas.filter(function (l) { return !l.remover && valido(l.data); });
+    if (!alvo.length || !locais.length) { dispo.hidden = true; return; }
+    dispo.hidden = false;
+    dispo.className = 'dispo info';
+    dispo.textContent = 'Conferindo se os locais estão livres…';
+    ED.timer = setTimeout(function () {
+      if (!ED) return;
+      var seq = ++ED.seq, meu = ED;
+      api('verificarConflitos', {
+        locais: locais, ignorarIds: ED.ids,
+        datas: alvo.map(function (l) { return { data: l.data, diaInteiro: l.diaInteiro, inicio: l.inicio, fim: l.fim }; })
+      }).then(function (lista) {
+        if (ED !== meu || seq !== ED.seq) return;
+        alvo.forEach(function (l, i) { l.conf = lista[i] || []; });
+        var n = mostrarConflitosEdicao();
+        dispo.className = 'dispo ' + (n ? 'warn' : 'ok');
+        dispo.textContent = n ? (n === 1 ? '1 data já tem' : n + ' datas já têm') + ' reserva no mesmo local e horário. Você pode salvar mesmo assim: a secretaria vai decidir.'
+          : 'Os locais escolhidos estão livres em todas as datas.';
+      }, function () {
+        if (ED !== meu || seq !== ED.seq) return;
+        dispo.className = 'dispo info';
+        dispo.textContent = 'Não foi possível conferir agora. A secretaria vai conferir ao receber.';
+      });
+    }, 600);
+  }
+
+  function salvarEdicao() {
+    lerEdicao();
+    var d = dadosEdicao(), erros = [];
+    var msgDatas = 'Confira as datas marcadas em vermelho: a data precisa ser de hoje em diante e o término depois do início.';
+    if (!d.evento) erros.push('Informe o nome do evento.');
+    if (!d.pastoral) erros.push('Informe a pastoral ou movimento.');
+    if (!d.responsavel) erros.push('Informe o nome do responsável.');
+    if (d.telefone.replace(/\D/g, '').length < 10) erros.push('Informe o telefone com DDD.');
+    if (d.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email)) erros.push('O e-mail parece incompleto. Confira ou deixe em branco.');
+    if (!d.locais.length) erros.push('Marque pelo menos um local.');
+    $$('#pDatas .ed-linha').forEach(function (el) {
+      var l = ED.linhas[+el.getAttribute('data-i')];
+      var ruim = !l.remover && (!valido(l.data) || l.data < ED.hoje || (!l.diaInteiro && (!l.inicio || !l.fim || minutos(l.fim) <= minutos(l.inicio))));
+      el.classList.toggle('invalida', ruim);
+      if (ruim && erros.indexOf(msgDatas) < 0) erros.push(msgDatas);
+    });
+    var caixa = $('#pErro');
+    if (erros.length) {
+      caixa.innerHTML = erros.map(esc).join('<br>');
+      caixa.hidden = false;
+      caixa.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    caixa.hidden = true;
+    var remover = ED.linhas.filter(function (l) { return l.remover && l.id; }).map(function (l) { return l.id; });
+    var envio = Object.assign({}, d, {
+      datas: ED.linhas.filter(function (l) { return !l.remover; }).map(function (l) {
+        return { id: l.id || null, data: l.data, diaInteiro: l.diaInteiro, inicio: l.diaInteiro ? '' : l.inicio, fim: l.diaInteiro ? '' : l.fim, tipo: l.tipo };
+      }),
+      remover: remover
+    });
+    var seguir = remover.length
+      ? confirmar('Cancelar ' + (remover.length === 1 ? '1 data' : remover.length + ' datas') + '?',
+        '<p style="margin:0">As datas marcadas como “Será cancelada” serão liberadas no calendário para outras pastorais.</p>', 'Salvar e cancelar', 'perigo')
+      : Promise.resolve(true);
+    seguir.then(function (sim) {
+      if (!sim) return;
+      emAndamento('Salvando as alterações…', function () {
+        return api('editarPedido', consultaAtual.num, consultaAtual.tel, envio);
+      }).then(function (res) {
+        var rs = res.resumo, partes = [];
+        consultaAtual.tel = d.telefone;
+        $('#cTel').value = d.telefone;
+        guardar('ultimoTel', d.telefone);
+        fecharEdicao();
+        if (rs.alteradas) partes.push(rs.alteradas + (rs.alteradas === 1 ? ' data alterada' : ' datas alteradas'));
+        if (rs.novas) partes.push(rs.novas + (rs.novas === 1 ? ' data nova' : ' datas novas'));
+        if (rs.canceladas) partes.push(rs.canceladas + (rs.canceladas === 1 ? ' data cancelada' : ' datas canceladas'));
+        if (!partes.length && rs.textos) partes.push('dados do pedido atualizados');
+        var msg = partes.length
+          ? 'Alterações salvas: ' + partes.join(', ') + '.' + (rs.pendentes ? ' ' + (rs.pendentes === 1 ? '1 data aguarda' : rs.pendentes + ' datas aguardam') + ' a aprovação da secretaria.' : '')
+          : 'Nada foi alterado.';
+        renderConsulta(res.pedido, msg);
+        $('#consultaRes').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (partes.length) atualizarAnos();
+      }, function (e) {
+        caixa.textContent = e.message;
+        caixa.hidden = false;
+      });
+    });
   }
 
   function cancelarMarcadas() {
@@ -1857,7 +2094,8 @@ footer.rodape .links { display: flex; flex-wrap: wrap; gap: 6px 18px; }
             '<span><b class="num">' + esc(brMedio(l.data)) + '</b> · <span class="num">' + esc(horario(l)) + '</span>' + (l.tipo !== 'Evento' ? ' · ' + esc(l.tipo) : '') + '</span></label>' +
             c.map(function (x) {
               return '<span class="conf">Conflito: ' + esc(x.evento) + ' — ' + esc(x.pastoral) + ' (' + esc(x.locais.join(', ')) + ', ' + esc(horario(x)) + ', ' + esc(ST_ROTULO[x.status].toLowerCase()) + (x.pedido ? ', pedido nº ' + x.pedido : '') + ')</span>';
-            }).join('') + '</li>';
+            }).join('') +
+            (l.obsSecretaria ? '<span class="dica" style="margin-left:30px">' + esc(l.obsSecretaria) + '</span>' : '') + '</li>';
         }).join('') + '</ul>' +
         '<div class="acoes"><button class="btn ok" data-acao="aprovar">' + ICO_OK + ' Aprovar marcadas</button>' +
         '<button class="btn perigo" data-acao="recusar">Recusar marcadas</button></div>' +
@@ -2366,6 +2604,14 @@ footer.rodape .links { display: flex; flex-wrap: wrap; gap: 6px 18px; }
     if (t.hasAttribute('data-vista')) { mudarVista(t.getAttribute('data-vista')); return; }
     if (t.hasAttribute('data-remover')) { F.removidas[t.getAttribute('data-remover')] = true; F.avulsas = F.avulsas.filter(function (d) { return d !== t.getAttribute('data-remover'); }); atualizarForm(); return; }
     if (t.hasAttribute('data-remover-extra')) { F.extras.splice(+t.getAttribute('data-remover-extra'), 1); atualizarForm(); return; }
+    if (t.hasAttribute('data-ed-remover') && ED) {
+      lerEdicao();
+      var li = +t.getAttribute('data-ed-remover'), lr = ED.linhas[li];
+      if (lr && !lr.id) ED.linhas.splice(li, 1); else if (lr) lr.remover = !lr.remover;
+      renderLinhasEdicao();
+      agendarConflitosEdicao();
+      return;
+    }
     if (t.hasAttribute('data-secaba')) { S.admin.aba = t.getAttribute('data-secaba'); renderSecretaria(); return; }
     if (t.hasAttribute('data-editar')) { abrirEdicaoPorId(t.getAttribute('data-editar')); return; }
     if (t.hasAttribute('data-cancelar')) {
@@ -2421,6 +2667,19 @@ footer.rodape .links { display: flex; flex-wrap: wrap; gap: 6px 18px; }
       case 'sair-modo-sec': S.modoSec = false; aplicarMinimos(); renderResumo(); break;
       case 'cancelar-marcadas': cancelarMarcadas(); break;
       case 'marcar-todas': $$('.cCanc').forEach(function (i) { i.checked = true; }); break;
+      case 'editar-pedido': abrirEdicaoPedido(); break;
+      case 'ed-desistir': fecharEdicao(); if (consultaAtual && consultaAtual.r) renderConsulta(consultaAtual.r); break;
+      case 'ed-salvar': if (ED) salvarEdicao(); break;
+      case 'ed-add': {
+        if (!ED) break;
+        lerEdicao();
+        var ult = ED.linhas.filter(function (l) { return !l.remover; }).slice(-1)[0] || { diaInteiro: false, inicio: '19:00', fim: '21:00' };
+        ED.linhas.push({ id: null, data: '', diaInteiro: ult.diaInteiro, inicio: ult.inicio || '19:00', fim: ult.fim || '21:00', tipo: 'Evento', remover: false });
+        renderLinhasEdicao();
+        var campos = $$('#pDatas .ed-data');
+        if (campos.length) campos[campos.length - 1].focus();
+        break;
+      }
       case 'sec-sair': sair(); break;
       case 'sec-atualizar': emAndamento('Atualizando a lista…', carregarSecretaria); break;
       case 'sec-nova': S.modoSec = true; aplicarMinimos(); limparForm(false); irPara('reservar'); break;
@@ -2472,6 +2731,17 @@ footer.rodape .links { display: flex; flex-wrap: wrap; gap: 6px 18px; }
     atualizarForm();
   });
   $('#formConsulta').addEventListener('submit', consultar);
+  $('#consultaRes').addEventListener('change', function (ev) {
+    if (!ED) return;
+    var t = ev.target;
+    if (t.classList.contains('ed-dia')) { var hs = $('.hs', t.closest('.ed-linha')); if (hs) hs.hidden = t.checked; }
+    if (t.id === 'pPastoral') $('#pPastoralOutra').hidden = t.value !== '__outra';
+    if (t.closest('#pDatas') || t.closest('#pLocais')) {
+      var linha = t.closest('.ed-linha');
+      if (linha) linha.classList.remove('invalida');
+      agendarConflitosEdicao();
+    }
+  });
   $('#formLogin').addEventListener('submit', entrar);
   ['#tMes', '#tStatus', '#tLocal'].forEach(function (s) { $(s).addEventListener('change', renderTodas); });
   $('#tBusca').addEventListener('input', renderTodas);
